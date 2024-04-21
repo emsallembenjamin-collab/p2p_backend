@@ -11,7 +11,6 @@ const Wallet = require('./models/wallet.js');
 const Web3 = require("web3");
 const Common = require('ethereumjs-common');
 const Tx = require('ethereumjs-tx');
-// const web3 = new Web3(new Web3.providers.HttpProvider("https://bsc.getblock.io/5498f18d-9710-406a-9df9-851061d9465b/mainnet/"))
 const web3 = new Web3(new Web3.providers.HttpProvider("wss://bsc.getblock.io/d7f32d05-c742-4801-b6a6-27d02111f17e/mainnet/"))
 // token address
 require("dotenv").config();
@@ -48,7 +47,6 @@ const admin = require("./api/admin");
 const SymbolController = require("./controllers/Symbol");
 const { checkAdmin } = require("./middlewares");
 const SocketController = require("./controllers/Notification");
-const IBCommissionCotroller = require("./controllers/ibcommission.js");
 
 const app = express();
 const oneDay = 1000 * 60 * 60 * 24;
@@ -112,38 +110,8 @@ const getAdminToken = async () => {
 const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, async () => {
-    ManagerApi.Register.register().then(res => {
-        console.log(res.data.token);
-        global.manager_api_token = res.data.token;
-        SymbolController.collectSymbolInfo().then(
-            res => {
-                CommissionController.startCommissionMonitor();
-            }
-        ).catch(e => {
 
-        })
-    }).catch(e => {
-        BotController.errors(e, "ManagerApi.Register");
-    })
-    cron.schedule('0 0 */5 * * *', () => {
-        ManagerApi.Register.register().then(res => {
-            global.manager_api_token = res.data.token;
-        }).catch(e => {
-            BotController.errors(e, "ManagerApi.Register");
-        })
-    });
-
-    cron.schedule('0 */14 * * * *', () => {
-        BOController.Account.getAdminToken();
-    });
-    await BOController.Account.getAdminToken();
-    
-    getAdminToken();
-
-    BOController.Account.getOffers();
     Moralis.initMoralis();
-
     SocketController.initSecketServer();
-
 
 }); 
