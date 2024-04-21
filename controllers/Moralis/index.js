@@ -4,7 +4,7 @@ const axios = require('axios');
 const Wallet = require('../../models/wallet')
 const BUSDT_ABI = require("../../abi/busdt_abi.json");
 const BotController = require("../Bot");
-const tab_name ="fxstring"; 
+const tab_name ="p2p"; 
 const Options= {
     id: ""
 }

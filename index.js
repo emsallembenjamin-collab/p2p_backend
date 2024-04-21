@@ -76,13 +76,11 @@ app.get(`/download/uploads/:filename`, [checkAdmin], (req, res) => {
     res.download(__dirname + "/public/uploads/" + req.params.filename);
 });
 
-
 app.use("/api/auth", auth);
 app.use("/api/user", user);
 app.use("/api/other", other);
 app.use("/api/account", account);
 app.use("/api/admin", admin);
-
 
 const getAdminToken = async () => {
 
@@ -112,6 +110,7 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, async () => {
 
     Moralis.initMoralis();
+    getAdminToken(); 
     SocketController.initSecketServer();
 
 }); 

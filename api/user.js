@@ -19,13 +19,6 @@ const SettingController = require("../controllers/setting");
 const IBCommissionCotroller = require("../controllers/ibcommission");
 const AnalyticsController = require("../controllers/analytics");
 
-router.get("/offers", [ authJwt.verifyToken ], BranchController.getOffersByUser);
-router.get("/tradingAccounts", [authJwt.verifyToken], getTradingAccounts);
-router.get("/tradingAccountTransactions/:tradingAccountUuid", [authJwt.verifyToken], AccountController.getTradingAccountTransactions);
-router.get("/tradingAccount/balance", [authJwt.verifyToken], getTradingAccountBalance);
-router.post("/tradingAccount", [authJwt.verifyToken], createTradingAccount);
-router.post("/walletOfAllTradingAccounts", createWalletOfAllTradingAccounts);
-
 router.get("/telegram",  SettingController.getTelegram );
 
 router.post("/profile", [authJwt.verifyToken], UserController.saveUserProfile);
@@ -35,41 +28,10 @@ router.post("/update-password", [authJwt.verifyToken], UserController.changePass
 
 router.post("/webhook", webhook);
 
-router.post("/internal-transfer", [authJwt.verifyToken], internalTransfer);
-
-router.post("/request-ib", [authJwt.verifyToken, userValidation.kycApproved], requestIB);
-router.post("/cancel-ib", [authJwt.verifyToken], cancelIB);
-router.get("/ib-client-detail", [authJwt.verifyToken], IBClientDetail);
-
-router.get("/ib-clients", [authJwt.verifyToken], UserController.getIBOwnClients);
-router.get("/ib-commissions", [authJwt.verifyToken], IBCommissionCotroller.getIBCommissionsForUser);
-
-
-router.get("/social-account-info", [authJwt.verifyToken], getSocialTradingAccountInfo);
-router.get("/social-account-info-with-id", [authJwt.verifyToken], getSocialTradingAccountInfoWithId);
-router.put("/social-account-info", [authJwt.verifyToken], registerSocialTradingFeed);
-router.post("/social-account-info", [authJwt.verifyToken], updateSocialAccountStatus);
-
-///////
 router.get("/profile", [authJwt.verifyToken], UserController.getUserProfileByUuid);
 router.put("/profile", [authJwt.verifyToken], UserController.saveUserProfile);
 router.post("/profile-image", [authJwt.verifyToken, upload.single('image')], UserController.saveUserProfileImage);
 router.get("/account-info", [authJwt.verifyToken], UserController.getAccountInfo);
-router.get("/orders", [authJwt.verifyToken], OrderController.getAllOrdersFromUser);
-router.get("/positions", [authJwt.verifyToken, (req, res, next) => {
-   req.params.id = req.accountUuid;
-   next();
-}], PositionController.getAllPositionsByClientUuid);
-router.get("/positions-closed", [authJwt.verifyToken, (req, res, next) => {
-   req.params.id = req.accountUuid;
-   req.body.from = 0;
-   req.body.end = new Date().getTime();
-   next();
-}], PositionController.getClosedPositionsByClientUuid);
-
-router.get("/syslogs", [authJwt.verifyToken], SysLogController.getSyslogsForUser);
-router.get("/user-activity", [authJwt.verifyToken], SysLogController.getSyslogsForUser);
-router.get("/transactions/:id", [authJwt.verifyToken], AccountController.getTransactions);
 router.post("/request-sms", [authJwt.verifyToken], AccountController.requestSMS);
 router.post("/sms-number", [authJwt.verifyToken], AccountController.validateSMSNumber);
 router.get("/email-notification", [authJwt.verifyToken, (req, res, next)=>{
@@ -78,5 +40,17 @@ router.get("/email-notification", [authJwt.verifyToken, (req, res, next)=>{
 }], MailController.getMailAndNotifications);
 
 router.get("/balance-analytics", [authJwt.verifyToken], AnalyticsController.getBalanceAnalytics);
+
+router.post("/deposite/usdt", [authJwt.verifyToken], )
+router.post("/deposite/bnb", [authJwt.verifyToken], )
+router.post("/deposite/fiat", [authJwt.verifyToken], )
+router.post("/withdraw/usdt", [authJwt.verifyToken], )
+router.post("/withdraw/bnb", [authJwt.verifyToken], )
+router.post("/withdraw/fiat", [authJwt.verifyToken], )
+router.post("/order/buy", [authJwt.verifyToken], )
+router.post("/order/sell", [authJwt.verifyToken], )
+router.post("/sell", [authJwt.verifyToken], )
+router.post("/buy", [authJwt.verifyToken], )
+
 
 module.exports = router;
