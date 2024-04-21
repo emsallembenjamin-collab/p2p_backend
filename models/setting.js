@@ -4,8 +4,7 @@ const Setting = mongoose.model(
   "Setting",
   new mongoose.Schema({
     telegram: String, 
-    branchUuid: String,
-    commissionType: String
+    
   })
 );
 

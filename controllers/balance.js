@@ -16,6 +16,7 @@ const OperationTypes = {
     OPERATION_NONE: "OPERATION_FAILED"
 }
 
+
 const requestWithdrawalManual = async (req, res, next) => {
 
     const data = req.body;

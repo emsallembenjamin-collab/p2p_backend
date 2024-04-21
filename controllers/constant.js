@@ -11,15 +11,16 @@ exports.LedgerTypes = {
     AGENT_COMMISSION: 8,
 }
 
+exports.OrderType = {
+   BUY: 0, 
+   SELL: 1, 
+}
+
 exports.OrderStates = {
-    UNDEFINEDEXEC: 0,
-    ORDERCREATED: 1,
-    ORDERCANCELLED: 2,
-    ORDERPARTIALFILL: 3,
-    ORDERFILL: 4,
-    ORDERREJECTED: 5,
-    ORDERACTIVATED: 6,
-    ORDERPROCESSED: 7,
+    PENDING: 0, 
+    PROCESSING:1, 
+    FINISHED: 2, 
+    CANCELLED: 3, 
 }
 
 exports.OrderTypes = {

@@ -12,7 +12,6 @@ const Transaction = mongoose.model(
         type: String,
         required: true
     },
-    
     order_type: {
         type: String,
         enum: ['Sll', 'Buy'],

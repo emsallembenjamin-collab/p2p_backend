@@ -5,25 +5,11 @@ const Report = mongoose.model(
   "Report",
   new mongoose.Schema({
     uuid: String, 
-    clientUuid: String,
-    email: String,
-    user_name: String, 
-    tradingAccountUuid: String,
-    tradingAccountId: String,
-    amount: Number,
-    code: String,
-    transfer_code: String,
-    transfer_amount: String,
-    createdAt: Date,
-    ethAddress: String,
-    status: String,
-    depositMode: {
-      type: String, 
-      default: DepositMode.GATEWAY
-    },
-    dealer: String, 
-    comment:String, 
-    from: String, 
+    user_id: String, 
+    amount: String, 
+    type: String, 
+    at: Date, 
+    transactionID: String, 
   })
 );
 
