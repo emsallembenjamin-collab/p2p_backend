@@ -1,0 +1,10 @@
+node_modules
+/public/uploads
+/public/result.csv
+/controllers/user_.js
+/public/qrcode
+.env
+.env.prod
+/controllers/Commission/setting.json
+package-lock.json
+yarn.lock

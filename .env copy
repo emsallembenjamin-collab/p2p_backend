@@ -1,0 +1,67 @@
+APP_MODE                    = Local
+
+PORT                        = 8080
+DEV                         = true
+DB_URL                      = mongodb://localhost:27017
+DB_NAME                     = exxo
+MANAGE_API_SERVER           = https://manager-api-mt.match-trade.com
+API_SERVER                  = https://mtco.match-trade.com # https://bo-demo.match-trader.com
+
+# ######################################
+# MMANAGER_ID                  = 904
+# MANAGER_PASSWORD            = stalowa88rura
+MMANAGER_ID                  = 870
+MANAGER_PASSWORD            = ziqjcnbs65
+
+# ########################################
+BACKEND_SERVER              = http://localhost:8080
+FRONT_ENTRY                 = http://localhost:3000
+IB_LINK_ENTRY               = http://localhost:3000
+
+# ########################################
+AUTH_USERNAME               =  #support1@cfdprime.com #cfdprime-broker@integration.com
+AUTH_PASSWORD               =  #admin@2022
+AUTH_GRANTTYPE              = password
+AUTH_AUTHORIZATION          = ''
+AUTH_COOKIE                 = ''
+# ########################################
+
+API_ACCESS_TOKEN            = 
+BRANCH_UUID                 =  #5fad2d4e-907e-4f94-b923-ce7ea040c300 # or 7cfd3712-a4c3-4915-b5df-e203b1921763
+PAYMENT_GATEWAY_UUID        =  #62026e1a-dce6-4db1-8c38-bc553f07efae #"a3846b0c-a651-44ae-b1d1-2be1462cabb8"
+
+MORALIS_KEY                 =GovG45DxlZoPURZbjOpRXNqQOImHaiZw7BhAeTllRIdPRm1I6czQaxU9WpvpDk1e
+MORALIS_PROJECT_ID          =87d28923-06c1-409f-a029-b08e5b726e6c
+MORALIS_SECRET              =B4cagIWYI2l6NmZmo28pgdjOfd54qZn010VzBsebMmnIqnC2sp2p6vAOlAOgeB2C
+
+GOOGLE_CLIENT_ID            =
+INFURA_KEY                  =
+ADMIN_WALLET_PRIVATE_KEY    =
+ADMIN_WALLET_ADDRESS        =
+
+MAIL_MAILER                 =smtp
+#MAIL_HOST                   =smtp.gmail.com
+MAIL_HOST                   =smtpout.secureserver.net
+MAIL_PORT                   =465
+MAIL_NAME                   =FxString
+MAIL_USERNAME               =
+MAIL_PASSWORD               =
+MAIL_ENCRYPTION             =SSL
+MAIL_FROM_ADDRESS           =null
+
+TELEGRAM_BOT_TOKEN=         
+# https://api.telegram.org/bot5802024434:AAG1QP4xAx9kzTq3THDnO1j_76Ri2Waiu3s/getUpdates
+BALANCE_CHAT_ID             =-4076389443
+DEPOSIT_CHAT_ID             =-4047108469
+WITHDRAW_REQUEST_CHAT_ID    =-4078764278
+SIGMA_CHANNEL_ID            =-4040483283
+TRADING_ACCOUNT_CHAT_ID     =-4052391969
+INTERNAL_TRANSFER_CHAT_ID   =-4031408130
+
+TELEGRAM_ENABLED            = 1
+
+TWILIO_SID = ACc77f7b5eceee75f2a4bb22830234ac7d
+TWILIO_TOKEN = 06ea3e4c915089fa583d29b3a51c82cb
+TWILIO_PHONE = +13192467583
+
+WS_PORT=62421
