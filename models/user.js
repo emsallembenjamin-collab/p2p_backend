@@ -46,10 +46,16 @@ const User = mongoose.model(
     } ,
     parentAccountUuid: String, 
     gaSecret: String,
-    tronAddress: String, 
-    ethAddress: String, 
-    
-
+    ethAddress:           String,
+    ethPrivateKey:        String,
+    tronAddress:          String,
+    tronPrivateKey:       String,
+    usdtBalance: Number, 
+    usdtLock: Number, 
+    fiatBalance: Number, 
+    fiatLock: Number, 
+    bnbBalance: Number, 
+    bnbLock: Number, 
   })
 );
 
