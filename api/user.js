@@ -1,19 +1,10 @@
 var router = require("express").Router();
 const { authJwt, verifySignUp, userValidation } = require("../middlewares");
 const { upload } = require("../controllers/controllers");
-const { webhook,  updateUsers, getTradingAccounts,  createTradingAccount,
-   createWalletOfAllTradingAccounts, verifyProfile, internalTransfer, getTradingAccountBalance,
-   requestIB, cancelIB, IBClientDetail,
-   getSocialTradingAccountInfo,
-   getSocialTradingAccountInfoWithId,
-   registerSocialTradingFeed, updateSocialAccountStatus, } = require("../controllers/user");
 const UserController = require("../controllers/customer");
-const BranchController = require("../controllers/branch");
 const AccountController = require("../controllers/account");
 const multer = require('multer');
 const OrderController = require("../controllers/order");
-const PositionController = require("../controllers/position");
-const SysLogController = require("../controllers/syslog");
 const MailController = require("../controllers/mail");
 const SettingController = require("../controllers/setting");
 const IBCommissionCotroller = require("../controllers/ibcommission");
@@ -26,7 +17,7 @@ router.post("/verify-profile", upload.fields([{ name: "frontImg", maxCount: 1 },
 router.post("/checkDuplicateUsernameOrEmail", verifySignUp.checkDuplicateUsernameOrEmail, (req, res) => { res.status(200).send(true) });
 router.post("/update-password", [authJwt.verifyToken], UserController.changePassword);
 
-router.post("/webhook", webhook);
+router.post("/webhook", UserController.webhook);
 
 router.get("/profile", [authJwt.verifyToken], UserController.getUserProfileByUuid);
 router.put("/profile", [authJwt.verifyToken], UserController.saveUserProfile);
@@ -47,7 +38,7 @@ router.post("/deposite/fiat", [authJwt.verifyToken], )
 router.post("/withdraw/usdt", [authJwt.verifyToken], )
 router.post("/withdraw/bnb", [authJwt.verifyToken], )
 router.post("/withdraw/fiat", [authJwt.verifyToken], )
-router.post("/order/buy", [authJwt.verifyToken], )
+router.post("/order/buy", [authJwt.verifyToken],  )
 router.post("/order/sell", [authJwt.verifyToken], )
 router.post("/sell", [authJwt.verifyToken], )
 router.post("/buy", [authJwt.verifyToken], )

@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const { PaymentType } = require("../controllers/constant");
-const Transaction = mongoose.model(
+const Order = mongoose.model(
   "Orders",
   new mongoose.Schema({
     order_id: {
@@ -8,7 +8,7 @@ const Transaction = mongoose.model(
         required: true,
         unique: true
     },
-    user_id: {
+    clientUuid: {
         type: String,
         required: true
     },
@@ -23,7 +23,7 @@ const Transaction = mongoose.model(
     },
     state: {
         type: String,
-        enum: ['Pending', 'Completed', 'Cancelled'],
+        enum: ['Pending', 'Completed', 'Cancelled', 'New'],
         required: true,
         default: 'Pending'
     },
@@ -33,4 +33,4 @@ const Transaction = mongoose.model(
     }
   })
 );
-module.exports = Transaction;
+module.exports = Order;

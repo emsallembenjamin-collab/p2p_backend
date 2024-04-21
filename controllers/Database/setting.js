@@ -1,7 +1,6 @@
 const Setting = require('../../models/setting');
 
 const createDefaultBranch =async  (branchUuid) => {
-
     try {
         let setting = new Setting({
             branchUuid,

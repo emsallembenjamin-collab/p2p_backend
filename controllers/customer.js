@@ -11,6 +11,7 @@ const PositionController = require("./position");
 const { OAuth2Client } = require('google-auth-library');
 const { generatePassword } = require("../utils/helper");
 const { readSettings } = require("./Commission");
+const DepositHistory = require("../models/deposit_history");
 const client = new OAuth2Client(`${process.env.GOOGLE_CLIENT_ID}`);
 
 const getUsers = async (req, res, next) => {
@@ -171,11 +172,11 @@ const createUser = async (req, res, next) => {
     }
 }
 const updateStatus = async (req, res, next) => {
-    try{
+    try {
         const _id = req.params.id;
         let status = req.body.verification_status;
         let place = await Database.Account.updateVerifyStatus({ _id, status });
-    
+
         if (place) {
             if (status === KYCStatus.APPROVED) {
                 BotController.userApporved(place.email);
@@ -194,7 +195,7 @@ const updateStatus = async (req, res, next) => {
                 error: "Failed to create user."
             })
         }
-    }catch(e){
+    } catch (e) {
         return res.status(200).send({
             success: false,
             error: "Failed to create user."
@@ -312,10 +313,10 @@ const updateIBStatus = async (req, res, next) => {
     if (ibStatus === IBStatus.APPROVED) {
         let commissionType = await Database.Setting.getCommissionType();
         user_result = await Database.Account.updateIBStatus(req.body, tradingAccount.tradingAccountId, tradingAccount.tradingAccountUuid);
-        if(user_result.parentTradingAccountId){
-            let parentAccount = await Database.Account.findOneAccountByQuery({ibParentTradingAccountId:user_result.parentTradingAccountId}); 
-            user_result.ibCommissionType = parentAccount.ibCommissionType || commissionType || 'Lot'; 
-        }else {
+        if (user_result.parentTradingAccountId) {
+            let parentAccount = await Database.Account.findOneAccountByQuery({ ibParentTradingAccountId: user_result.parentTradingAccountId });
+            user_result.ibCommissionType = parentAccount.ibCommissionType || commissionType || 'Lot';
+        } else {
             user_result.ibCommissionType = commissionType || 'Lot'
         }
         await user_result.save();
@@ -358,38 +359,38 @@ const getIBClients = async (req, res, next) => {
     }
 }
 
-const getIBOwnClients = async (req, res, next)=>{
+const getIBOwnClients = async (req, res, next) => {
     const { eamil, accountUuid } = req;
-    const user = await Database.Account.getAccountDetailByUuid(accountUuid); 
+    const user = await Database.Account.getAccountDetailByUuid(accountUuid);
 
-    if(user && user.ibStatus == IBStatus.APPROVED && user.ibParentTradingAccountId){
-        let start = 0, end = 10; 
-        const commissionSetting = readSettings(); 
-        const index = commissionSetting.rankingLabels.findIndex(item=>item == user.ibRanking); 
-        if(index == 0 || index == -1){
-            start = 0; 
-            end = commissionSetting.rankingCommissionLevels[0]; 
-        }else {
-            start = commissionSetting.rankingCommissionLevels[index-1]; 
-            end= commissionSetting.rankingCommissionLevels[index]; 
+    if (user && user.ibStatus == IBStatus.APPROVED && user.ibParentTradingAccountId) {
+        let start = 0, end = 10;
+        const commissionSetting = readSettings();
+        const index = commissionSetting.rankingLabels.findIndex(item => item == user.ibRanking);
+        if (index == 0 || index == -1) {
+            start = 0;
+            end = commissionSetting.rankingCommissionLevels[0];
+        } else {
+            start = commissionSetting.rankingCommissionLevels[index - 1];
+            end = commissionSetting.rankingCommissionLevels[index];
         }
 
         /////// get tree and summary info 
         let summary = {
-            totalQClients:0, 
-            totalIbs:0, 
-            totalVolume:0
+            totalQClients: 0,
+            totalIbs: 0,
+            totalVolume: 0
         }
 
-        let result = await Database.Account.createIBClientTree(user.ibParentTradingAccountId, 0, start, end, summary); 
+        let result = await Database.Account.createIBClientTree(user.ibParentTradingAccountId, 0, start, end, summary);
         return res.status(200).send({
-            success: true, 
-            body: result, 
+            success: true,
+            body: result,
             summary
         })
-    }else{
+    } else {
         return res.status(200).send({
-            success: false, 
+            success: false,
             error: "There are some problems with your account."
         })
     }
@@ -750,14 +751,14 @@ const updateIBUser = async (req, res, next) => {
 const updateGASecret = async (req, res, next) => {
     const accountUuid = req.params.id;
     try {
-        const user =await  Database.Account.getAccountDetailByUuid(accountUuid);
+        const user = await Database.Account.getAccountDetailByUuid(accountUuid);
         const secret_2fa = speakeasy.generateSecret({ length: 16, symbols: 1 });
         await Database.Account.updateAccountProfile(accountUuid, {
             gaSecret: secret_2fa.base32,
         });
-        EmailController.sendTFACode(user.email, secret_2fa.base32); 
+        EmailController.sendTFACode(user.email, secret_2fa.base32);
         return res.status(200).send({ success: true, gaSecret: secret_2fa.base32 });
-        
+
     } catch (e) {
         return res.status(200).send({
             success: false
@@ -765,8 +766,8 @@ const updateGASecret = async (req, res, next) => {
     }
 }
 const updateTFAMode = async (req, res, next) => {
-    console.log("---------updateTFAMode---------"); 
-    const accountUuid = req.accountUuid; 
+    console.log("---------updateTFAMode---------");
+    const accountUuid = req.accountUuid;
     const data = req.body;
     try {
         const user = await Database.Account.updateAccountProfile(accountUuid, data);
@@ -783,7 +784,7 @@ const updateTFAMode = async (req, res, next) => {
 }
 const updateTfa = async (req, res, next) => {
 
-    const accountUuid = req.accountUuid; 
+    const accountUuid = req.accountUuid;
     const data = req.body;
     try {
         const user = await Database.Account.updateAccountProfile(accountUuid, data);
@@ -798,6 +799,122 @@ const updateTfa = async (req, res, next) => {
         })
     }
 }
+
+const webhook = async (req, res, next) => {
+    const transactions = req.body.erc20Transfers;
+    if (!req.body.confirmed) {
+        return res.status(200).send("Not confirmed");
+    } else if (transactions.length == 0 && transactions) {
+        return res.status(200).send('Verified');
+    }
+
+    console.log("process");
+    if (transactions?.length > 0) {
+        const element = transactions[0];
+        const deposit_amount = element.valueWithDecimals;
+        if (deposit_amount <= 0) {
+            return res.status(200).send("Value is 0");
+        }
+        let history = await DepositHistory.findOne({
+            txhash: element?.transactionHash,
+        });
+        if (history) {
+            if (history.status == 4) {
+                return res.status(200).send("Processed already!");
+            }
+        } else {
+            history = new DepositHistory({ txhash: element?.transactionHash });
+            await history.save();
+        }
+        const wallet_address = element.to;
+        Wallet.findOne({ ethAddress: wallet_address }).exec(async (err, wallet) => {
+            if (err || !wallet) {
+                return res.status(200).send("Couldn't find a wallet of this address!");
+            }
+            try {
+                if (history.status == 0) {
+                    BotController.depositByWallet(
+                        wallet.email,
+                        deposit_amount,
+                        wallet_address,
+                        wallet.tradingAccountId
+                    );
+                    history.status = 1;
+                }
+            } catch (error) {
+                return res.status(500).send("Error");
+                console.log(error);
+            }
+            const contract = new web3.eth.Contract(BNB_ABI, bnb);
+            const usdtContract = new web3.eth.Contract(BUSDT_ABI, busdt);
+
+            let sender = global.ADMIN_WALLET_ADDRESS;
+            let receiver = wallet_address;
+            let senderkey = global.ADMIN_WALLET_PRIVATE_KEY; //admin private key
+
+            if (history.status == 1) {
+                BalanceController._depositToTradingAccountId(
+                    deposit_amount,
+                    deposit_amount,
+                    DepositMode.GATEWAY,
+                    wallet.tradingAccountId,
+                    "USD",
+                    "Deposit From Wallet",
+                    wallet.email,
+                    wallet.email,
+                    wallet.clientUuid
+                );
+                history.status = 2;
+            }
+            try {
+                //BNB needed for getting USDT
+                const balance = await usdtContract.methods.balanceOf(receiver).call();
+                const amount = web3.utils.toHex(balance);
+
+                let result = await Web3Controller.sendBNBToWallet(
+                    global.ADMIN_WALLET_ADDRESS,
+                    global.ADMIN_WALLET_PRIVATE_KEY,
+                    wallet_address,
+                    amount
+                );
+                let result_to_admin = null;
+                if (history.status == 2) {
+                    result_to_admin = await Web3Controller.sendUSDTToWallet(
+                        wallet_address,
+                        wallet.ethPrivateKey,
+                        global.ADMIN_WALLET_DEPOSIT_ADDRESS,
+                        0
+                    );
+                }
+
+                if (result_to_admin) {
+                    history.status = 4;
+                    history.save();
+                    let admin_balance = await Web3Controller.getUSDTBalance(
+                        global.ADMIN_WALLET_ADDRESS
+                    );
+                    BotController.balanceChanged(
+                        deposit_amount,
+                        PaymentType.DEPOSIT,
+                        wallet.tradingAccountId,
+                        admin_balance
+                    );
+                    EmailController.sendDepositSuccess(wallet.email, deposit_amount);
+                    return res.status(200).send("success");
+                }
+                history.save();
+                return res.status(500).send("error");
+            } catch (err) {
+                history.save();
+                console.log(err);
+                BotController.errors(err, "WebHook");
+                return res.status(500).send("error");
+            }
+        });
+    } else {
+        return res.status(500).send("Didn't get correct transactions");
+    }
+};
 const UserController = {
     changePasswordFP,
     changePasswordFromAdmin,
@@ -835,7 +952,9 @@ const UserController = {
     updateIBUser,
     updateTFAMode,
     updateTfa,
-    updateGASecret
+    updateGASecret, 
+    
+    webhook
 }
 
 module.exports = UserController; 

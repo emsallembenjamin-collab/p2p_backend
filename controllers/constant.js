@@ -13,14 +13,16 @@ exports.LedgerTypes = {
 
 exports.OrderType = {
    BUY: 0, 
-   SELL: 1, 
+   SELL: 1,     
 }
 
 exports.OrderStates = {
-    PENDING: 0, 
-    PROCESSING:1, 
-    FINISHED: 2, 
-    CANCELLED: 3, 
+    New: 0,
+    PENDING: 1,
+    PROCESSING: 2, 
+    FINISHED: 3, 
+    CANCELLED: 4
+
 }
 
 exports.OrderTypes = {
