@@ -3,23 +3,11 @@ const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const mongoose = require("mongoose");
-const ethers = require("ethers");
-const BUSDT_ABI = require("./abi/busdt_abi.json");
-const BNB_ABI = require("./abi/bnb_abi.json");
 const AdminWallet = require("./models/admin_wallet");
-const Wallet = require('./models/wallet.js');
-const Web3 = require("web3");
-const Common = require('ethereumjs-common');
-const Tx = require('ethereumjs-tx');
-const web3 = new Web3(new Web3.providers.HttpProvider("wss://bsc.getblock.io/d7f32d05-c742-4801-b6a6-27d02111f17e/mainnet/"))
 // token address
 require("dotenv").config();
-const ManagerApi = require('./controllers/Manager');
 const Moralis = require('./controllers/Moralis');
-const BOController = require("./controllers/BO");
 const BotController = require("./controllers/Bot");
-const CommissionController = require("./controllers/Commission");
-const EmailController = require("./controllers/Email");
 const WebSocketController = require("./socket_server");
 
 const busdt = "0x55d398326f99059fF775485246999027B3197955"; ///BUSDT Contract
@@ -38,13 +26,10 @@ mongoose.connect(`${process.env.DB_URL}/${process.env.DB_NAME}`, [], (err) => {
     }
 });
 
-const router = require("./api/router");
 const auth = require("./api/auth");
 const user = require("./api/user");
 const other = require("./api/other");
-const account = require("./api/account");
 const admin = require("./api/admin");
-const SymbolController = require("./controllers/Symbol");
 const { checkAdmin } = require("./middlewares");
 const SocketController = require("./controllers/Notification");
 
@@ -65,6 +50,7 @@ app.use(express.json({ extended: false }));
 app.use(express.urlencoded({ extended: true }));
 app.use('/api/static', express.static('public/images'));
 app.use('/api/qrcode', express.static('public/qrcode'));
+
 // Initialization
 app.use(cookieParser());
 
@@ -72,17 +58,15 @@ app.get("/result", (req, res) => {
     res.sendFile(__dirname + "/public/result.csv");
 });
 app.get(`/download/uploads/:filename`, [checkAdmin], (req, res) => {
-
     res.download(__dirname + "/public/uploads/" + req.params.filename);
 });
 
 app.use("/api/auth", auth);
 app.use("/api/user", user);
 app.use("/api/other", other);
-app.use("/api/account", account);
 app.use("/api/admin", admin);
 
-const getAdminToken = async () => {
+const getAdminWallet = async () => {
 
     try {
         const wallet = await AdminWallet.findOne({});
@@ -100,7 +84,7 @@ const getAdminToken = async () => {
             global.ADMIN_WALLET_DEPOSIT_ADDRESS = process.env.ADMIN_WALLET_DEPOSIT_ADDRESS;
         }
     } catch (e) {
-        BotController.errors(e, "getAdminToken");
+        BotController.errors(e, "getAdminWallet");
         console.log(e);
     }
 }
@@ -108,9 +92,8 @@ const getAdminToken = async () => {
 const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, async () => {
-
     Moralis.initMoralis();
-    getAdminToken(); 
+    getAdminWallet(); 
     SocketController.initSecketServer();
 
 }); 

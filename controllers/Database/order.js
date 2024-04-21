@@ -1,8 +1,11 @@
 
 const Order = require("../../models/order");
 const User = require("../../models/user");
+const OrderTransaction = require("../../models/transaction");
 const uuid = require('uuid');
 const { OrderStates, OrderType } = require("../constant");
+const { or } = require("sequelize");
+const e = require("express");
 
 const createOrder = async (data) => {
     const order_id = uuid.v4();
@@ -12,9 +15,9 @@ const createOrder = async (data) => {
 
     const user =await User.findOne({accountUuid: clientUuid}); 
     if (order_type == OrderType.BUY) {
-        if (user.fiatBalance  < user.fiatLock + amount *price)
+        if (user.fiatBalance  < user.fiatLock + amount *price * 1.004)
             return false
-        user.fiatLock = user.fiatLock + amount * price; 
+        user.fiatLock = user.fiatLock + amount * price * 1.004; 
     } else if (order_type === OrderType.SELL) {
         if (user.usdtBalance  < user.usdtLock + amount)
             return false
@@ -60,13 +63,14 @@ const deleteOrderHistoryByBulk = async (data) => {
 }
 
 const updateOrderPrice = async (order_id, price) => {
+
     const order = await Order.findOne({ order_id: order_id });
     if (!order || order.status !== OrderStates.New || price<0) {
         return false;
     }
     const user =await User.findOne({accountUuid: order.clientUuid});
     if (order.order_type == OrderType.BUY) {
-        if (user.fiatBalance + order.amount * order.price < user.fiatLock + order.amount *price)
+        if (user.fiatBalance + order.amount * order.price * 1.004 < user.fiatLock + order.amount *price * 1.004)
             return false
         user.fiatLock = user.fiatLock + order.amount * price - order.amount * order.price; 
     } 
@@ -101,16 +105,18 @@ const updateOrderAmount = async (order_id, amount) => {
     
     return true;
 }
-const cancelOrder =async (order_id) => {
+const cancelOrder =async (order_id, clientUuid) => {
 
     const order = await Order.findOne({ order_id: order_id });
-    if (!order || order.status !== OrderStates.New) {
+    if (!order || order.status !== OrderStates.New || order.clientUuid !== clientUuid) {
         return false;
     }
 
     const user = User.findOne({accountUuid: order.clientUuid}); 
     if(order.order_type === OrderType.BUY){
-        user.fiatLock -= order.amount; 
+        user.fiatLock -= order.amount * order.price * 1.004; 
+    }else if(order.order_type === OrderType.SELL){
+        user.usdtLock -= order.amount;
     }
 
     order.state = OrderStates.CANCELLED; 
@@ -119,22 +125,66 @@ const cancelOrder =async (order_id) => {
     return true; 
 }
 
-const finishOrder =async (orderId) => {
+const finishOrder =async (order_id, accountUuid, amount) => {
 
     const order = await Order.findOne({ order_id: order_id });
     if (!order || order.status !== OrderStates.New) {
         return false;
     }
-    order.state = OrderStates.CANCELLED; 
+   
+    const owner  =await User.findOne({accountUuid: order.clientUuid});
+    const dealer = await User.findOne({accountUuid}); 
+
+    if(!owner || !dealer || amount>order.amount){
+        return false; 
+    }
+
+    if(order.order_type == OrderType.BUY ){
+        if(dealer.usdtBalance <amount) {
+            return false; 
+        }   
+
+        dealer.usdtBalance = dealer.usdtBalance - amount; 
+        owner.usdtBalance = owner.usdtBalance + amount;
+
+        dealer.fiatBalance = dealer.fiatBalance + amount * order.price * 0.996; 
+        owner.fiatBalance = owner.fiatBalance - amount * order.price *1.004; 
+
+        owner.fiatLock = owner.fiatLock - amount * order.price*1.004; 
+
+    }else if(order.order_type == OrderType.SELL){
+        if(dealer.fiatBalance <amount* order.price * 1.004) {
+            return false; 
+        }   
+
+        dealer.usdtBalance = dealer.usdtBalance + amount; 
+        owner.usdtBalance = owner.usdtBalance - amount;
+
+        dealer.fiatBalance = dealer.fiatBalance - amount * order.price * 1.004; 
+        owner.fiatBalance = owner.fiatBalance + amount * order.price *0.996; 
+
+        owner.usdtLock = owner.usdtLock - amount; 
+    }
+
+    order.amount = order.amount - amount; 
+
+    if(order.amount === 0){
+        order.state = OrderStates.FINISHED; 
+    }
+
     await order.save(); 
+    const transaction = new OrderTransaction({orderId: order_id, clientUuid: clientUuid, processingAt: new Date().getTime()}); 
+    await transaction.save();
+
     return true; 
 }
+
 
 const updateStatus = (orderId, status) => {
 
 }
 
-const OrderController = {
+const OrderService = {
     createOrder,
 
     deleteOrderHistoryByBulk,
@@ -147,5 +197,5 @@ const OrderController = {
 
 }
 
-module.exports = OrderController;
+module.exports = OrderService;
 

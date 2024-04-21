@@ -1,14 +1,13 @@
 var router = require("express").Router();
-const { authJwt, verifySignUp, userValidation } = require("../middlewares");
+const { authJwt, verifySignUp } = require("../middlewares");
 const { upload } = require("../controllers/controllers");
 const UserController = require("../controllers/customer");
 const AccountController = require("../controllers/account");
 const multer = require('multer');
-const OrderController = require("../controllers/order");
 const MailController = require("../controllers/mail");
 const SettingController = require("../controllers/setting");
-const IBCommissionCotroller = require("../controllers/ibcommission");
 const AnalyticsController = require("../controllers/analytics");
+const OrderController = require("../controllers/order");
 
 router.get("/telegram",  SettingController.getTelegram );
 
@@ -32,15 +31,16 @@ router.get("/email-notification", [authJwt.verifyToken, (req, res, next)=>{
 
 router.get("/balance-analytics", [authJwt.verifyToken], AnalyticsController.getBalanceAnalytics);
 
-router.post("/deposite/usdt", [authJwt.verifyToken], )
+router.post("/deposite/usdt", [authJwt.verifyToken], OrderController)
 router.post("/deposite/bnb", [authJwt.verifyToken], )
 router.post("/deposite/fiat", [authJwt.verifyToken], )
 router.post("/withdraw/usdt", [authJwt.verifyToken], )
 router.post("/withdraw/bnb", [authJwt.verifyToken], )
 router.post("/withdraw/fiat", [authJwt.verifyToken], )
-router.post("/order/buy", [authJwt.verifyToken],  )
-router.post("/order/sell", [authJwt.verifyToken], )
-router.post("/sell", [authJwt.verifyToken], )
+router.post("/order/buy", [authJwt.verifyToken], OrderController.OrderBuy )
+router.post("/order/sell", [authJwt.verifyToken], OrderController.OrderSell)
+router.post("/order/cancel", [authJwt.verifyToken], OrderController.OrderCancel)
+router.post("/sell", [authJwt.verifyToken],  )
 router.post("/buy", [authJwt.verifyToken], )
 
 
