@@ -46,7 +46,7 @@ const deleteMailHistoryByBulk = async (data)=>{
 }
 
 
-const MailController = {
+const MailService = {
     createMail, 
     deleteMailHistoryByBulk, 
     deleteMailHistoryByUuid,
@@ -55,5 +55,5 @@ const MailController = {
 
 }
 
-module.exports = MailController; 
+module.exports = MailService; 
 

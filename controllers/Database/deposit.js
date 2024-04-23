@@ -75,15 +75,7 @@ const getDepositHistoryAll = async (adminUuid, role) => {
     // };
     try {
         let result = await Deposit.aggregate([
-            {
-                $match: {
-                    depositMode: {
-                        $in: [
-                            DepositMode.GATEWAY, DepositMode.MANUAL
-                        ]
-                    }
-                }
-            },
+          
             {
                 $lookup: {
                     from: "users",
@@ -138,13 +130,6 @@ const getDepositHistoryAll = async (adminUuid, role) => {
         return false;
     }
 }
-
-const getDepositHostoryForUserByEmail = async (email, from = 0, to = new Date()) => {
-
-
-
-}
-
 const createDeposit = async (Deposit_info) => {
     const Uuid = uuid.v4();
     let Deposit_request = new Deposit({
@@ -161,83 +146,7 @@ const createDeposit = async (Deposit_info) => {
     }
 }
 
-const getIBCommissionHistory = async (adminUuid, role) => {
 
-    let match = {
-        depositMode: DepositMode.IB_COMMISSION
-    };
-    // if (role === AccountRole.ADMIN) {
-    //     match = {...match, adminUuid }
-    // }
-    try {
-        const result = await Deposit.aggregate([
-            {
-                $lookup: {
-                    from: "users",
-                    foreignField: "ibParentTradingAccountId",
-                    localField: "tradingAccountId",
-                    as: "user"
-                }
-            },
-            {
-                $unwind: "$user"
-            },
-            {
-                $lookup: {
-                    from: "branches",
-                    foreignField: "branchUuid",
-                    localField: "user.branchUuid",
-                    as: "branch"
-                }
-            },
-            {
-                $unwind: "$branch"
-            },
-            {
-                $lookup: {
-                    from: "admins",
-                    localField: "branch.adminUuid",
-                    foreignField: "adminUuid",
-                    as: "admin"
-                }
-            },
-            {
-                $unwind: "$admin"
-            },
-            {
-                $project: {
-                    "email": 1,
-                    "createdAt": 1,
-                    "amount": 1,
-                    "user.ibParentTradingAccountId": 1,
-                    "user.fullname": 1,
-                    "user.isEmailVerified": 1,
-                    "user.accountUuid": 1,
-                    "user._id": 1, 
-                    "adminUuid": "$admin.adminUuid",
-                    "depositMode": 1,
-                    "comment": 1, 
-                    "dealer": 1, 
-                    "from":1, 
-                }
-            },
-            {
-                $match: {
-                    ...match
-                }
-            },
-            {
-                $sort: {
-                    createdAt: -1
-                }
-            }
-        ])
-        return result;
-    } catch (e) {
-        return false;
-    }
-
-}
 
 const getDepositAnalytics = async (start, end, adminUuid, role) => {
 
@@ -513,7 +422,6 @@ const DepositModel = {
     getDepositAnalytics,
     getDepositHistoryAll,
     getDepositAmountByUserId,
-    getIBCommissionHistory,
     getTotalDepositAmount, 
     getData
 }

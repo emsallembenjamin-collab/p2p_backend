@@ -25,52 +25,6 @@ exports.OrderStates = {
 
 }
 
-exports.OrderTypes = {
-    BUYMARKET: 0,
-    SELLMARKET: 1,
-    BUYLIMIT: 2,
-    SELLLIMIT: 3,
-    BUYSTOP: 4,
-    SELLSTOP: 5,
-    BUYSTOPLIMIT: 6,
-    SELLSTOPLIMIT: 7,
-    BUYTPSL: 20,
-    SELLTPSL: 21,
-    BUYTPSLPENDING: 24,
-    SELLTPSLPENDING: 25,
-    BUYCORRECTION: 100,
-    SELLCORRECTION: 101,
-    BUYMAM: 102,
-    SELLMAM: 103,
-}
-
-exports.RecordTypes = {
-    FILLED: 1,
-    CANCELLED: 2,
-    LEDGERS: 3,
-    LP_EXEC_REPORT: 4,
-    ACCOUNT_SNAPSHOT: 5,
-    REJECTED: 6,
-    ADDED: 7,
-}
-
-exports.AdditionalTypes = {
-    NONE: 0,
-    NEGATIVE_BALANCE_WITHDRAW: 1,
-    CORRECTION: 2,
-    REVENUE_SHARE: 3,
-    INVOICE_PAYMENT: 4,
-    MINIMUM_MONTHLY: 5,
-}
-
-exports.Tifs = {
-    FILLORKILL: 0,
-    IMMEDIATEORCANCEL: 1,
-    DAYORDER: 2,
-    GOODTILLCANCEL: 3,
-    GOODTILLDATE: 4,
-}
-
 exports.AccountRole = {
     CUSTOMER: "User", 
     ADMIN: "Admin", 
@@ -84,20 +38,8 @@ exports.AdminRole = {
     APPROVE_DEPOSIT: "APPROVE_DEPOSIT",
     UPDATE_BRANCH: "UPDATE_BRANCH" ,
     UPDATE_USER: "UPDATE_USER",
-    UPDATE_IBUSER:"UPDATE_IBUSER"
 }
-exports.IBStatus = {
-    APPROVED: "APPROVED", 
-    DECLINED: "DECLINED",
-    PENDING: "PENDING",
-    NEW: "NEW"
-}
-exports.SocialStatus = {
-    APPROVED: "APPROVED", 
-    DECLINED: "DECLINED",
-    PENDING: "PENDING",
-    NEW: "NEW"
-}
+
 exports.KYCStatus ={
     APPROVED: "VERIFIED", 
     REJECTED: "REJECTED",
@@ -105,35 +47,11 @@ exports.KYCStatus ={
     NEW: "NEW", 
     DELETED: "DELETED"
 }
-exports.DepositMode ={
-    GATEWAY: "Payment Gateway",
-    MANUAL: "Manual",
-    INTERNAL: "Internal",
-    IB_COMMISSION: "IB Commission",
-    INITIAL: "INITIAL"
-}
 
 exports.DepositStatus = {
     DEPOSIT_DONE: "DONE",
     DEPOSIT_FAILED: "FAILED", 
 
-}
-
-exports.PaymentGateway = {
-    PAYMENT_PROCESS: "Payment Process", 
-    INTERNAL_TRANSFER: "Internal Transfer", 
-    USDT_TRANSFER: "USDT BEP20", 
-    VIETNAM_TRANSFER: "Vietnam Bank Transfer", 
-    SKRILL: "Skrill", 
-    NETELLER: "Net Eller", 
-    STICKPAY: "STICPAY",
-    INTER_BANKWIRE: "International Bankwire0", 
-    PAYPAL: "PAYPAL"
-}
-
-exports.WithdrawMode ={
-    AUTO: "Auto",
-    MANUAL: "Manual",
 }
 
 exports.WithdrawStatus ={
@@ -144,8 +62,8 @@ exports.WithdrawStatus ={
 }
 
 exports.PaymentType = {
-    DEPOSIT: "DEPOSIT",
-    WITHDRAWAL: "WITHDRAWAL"
+    Bank: "Bank",
+    Credit: "Credit"
 }
 
 exports.BranchStatus = {
