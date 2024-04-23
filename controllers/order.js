@@ -48,10 +48,24 @@ const BuyUSDT = async(req, res)=>{
     
 }
 
+const GetBuyOrders = async (req, res)=>{
+    const {accountUuid} = {req}
+    const orders = await OrderService.findBuyOrders();
+    return res.status(200).send(orders);
+}
+
+const GetSellOrders = async (req, res)=>{
+    const {accountUuid} = {req}
+    const orders = await OrderService.findSellOrders();
+    return res.status(200).send(orders)
+}
+
 const OrderController = {
     OrderBuy, 
     OrderSell, 
     OrderCancel, 
+    GetBuyOrders,
+    GetSellOrders
 }
 
 module.exports = OrderController; 

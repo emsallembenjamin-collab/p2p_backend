@@ -184,6 +184,16 @@ const updateStatus = (orderId, status) => {
 
 }
 
+const findBuyOrders = async () =>{
+    const orders = await Order.find({order_type: OrderType.BUY, state: OrderStates.New});
+    return orders; 
+}
+
+const findSellOrders = async () =>{
+    const orders = await Order.find({order_type: OrderType.SELL, state: OrderStates.New});
+    return orders; 
+}
+
 const OrderService = {
     createOrder,
 
@@ -195,6 +205,8 @@ const OrderService = {
     cancelOrder,
     finishOrder, 
 
+    findBuyOrders,
+    findSellOrders,
 }
 
 module.exports = OrderService;
