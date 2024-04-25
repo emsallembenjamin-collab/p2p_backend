@@ -27,9 +27,6 @@ router.delete("/user/:id", [checkAdmin], UserController.deleteUser )
 router.get("/user/:id", [checkAdmin], UserController.getUserProfile);
 router.post("/user/status/:id", [checkAdmin, checkUpdateUser], UserController.updateStatus);
 
-router.put("/user/branch/:id", [checkSuperAdmin], UserController.updateUserBranch);
-router.get("/user/ibuser/:id", [checkAdmin], UserController.getIBUser);
-router.put("/user/:id/ib-user", [checkAdmin, checkUpdateIBUser], UserController.updateIBUser);
 router.put("/user/:id/ga_secret", [checkAdmin], UserController.updateGASecret);
 
 router.post("/user/notification", [checkAdmin], UserController.updateStatus);
@@ -37,14 +34,10 @@ router.post("/mail/user/:id", [checkAdmin], MailController.sendMailToUser);
 router.post("/mail/bulk", [checkAdmin], MailController.sendMailToUsers);
 
 
-router.post('/update-ib-status', [checkAdmin, checkUpdateIBUser], UserController.updateIBStatus);
-router.post('/update-ib-commissiontype', [checkAdmin, checkUpdateIBUser], UserController.updateIBCommissionType);
 
 router.post("/bulk/kyc/approve", [checkAdmin, checkUpdateUser], UserController.approveBulkKYCStatus);
 router.post("/bulk/kyc/reject", [checkAdmin, checkUpdateUser], UserController.rejectBulkKYCStatus);
 router.post("/bulk/kyc/delete", [checkAdmin, checkUpdateUser], UserController.deleteBulkKYCStatus);
-router.post("/bulk/ib/approve", [checkAdmin, checkUpdateIBUser], UserController.approveBulkIBStatus);
-router.post("/bulk/ib/reject", [checkAdmin, checkUpdateIBUser], UserController.rejectBulkIBStatus);
 router.post("/bulk/account", [checkSuperAdmin], UserController.updateStatus);
 router.post("/bulk/account/deposit", [checkSuperAdmin], UserController.updateStatus);
 router.post("/bulk/account/withdraw", [checkSuperAdmin], UserController.updateStatus);
@@ -52,34 +45,20 @@ router.delete("/bulk/account", [checkSuperAdmin], UserController.updateStatus);
 router.get("/kyc-setting", [checkAdmin], KYCController.getKYCSettings );
 router.put("/kyc-setting", [checkAdmin], KYCController.updateKYCSetting );
 router.post('/tradingAccounts/qrcode', generateAllQrcode);
-router.get("/active-orders/:id",[checkAdmin ], OrderController.getActiveOrdersByAccountUuid);
-router.get("/canceled-orders/:id",[checkAdmin ], OrderController.getCanceledOrdersByAccountUuid);
 
-
-router.get("/deposit/trading-account/:id", [checkAdmin], BalanceController.getDepositHistoryForTradingAccount);
 router.get("/deposit/user/:id", [checkAdmin], BalanceController.getDepositHistoryForUser);
 router.get("/deposit", [checkAdmin], BalanceController.getDepositHistoryAll);
 router.get("/deposit-amount", [checkAdmin], BalanceController.getTotalDepositAmount);
-router.post("/deposit/:id", [checkAdmin], BalanceController.depositToTradingAccountId);
 
 
 router.get("/withdraw/user/:id", [checkAdmin], BalanceController.getWithdrawHistoryForUser);
 router.get("/withdraw", [checkAdmin], BalanceController.getWithdrawHistoryAll);
 router.post("/withdraw/create", [checkAdmin, checkUpdateWithdrawStatus], BalanceController.requestWithdrawalManual);
-router.put("/withdraw/confirm/:id", [checkAdmin, checkUpdateWithdrawStatus], BalanceController.confirmWithdrawall);
-router.post("/withdraw/reject/:id", [checkAdmin, checkUpdateWithdrawStatus], BalanceController.rejectWithdrawall);
-
-
-router.post("/bulk/withdraw/approve", [checkAdmin, checkUpdateWithdrawStatus], BalanceController.approveMassWRequest);
-router.post("/bulk/withdraw/reject", [checkAdmin, checkUpdateWithdrawStatus], BalanceController.rejectMassWRequest);
 
 router.put("/admin", [checkAdmin, checkUpdateAdmin], AdminController.createAdmin );
 router.post("/admin", [checkAdmin, checkUpdateAdmin], AdminController.updateAdmin );
 router.get("/admins", [checkAdmin, checkUpdateAdmin], AdminController.getAdmins );
 router.get("/admin/:id", [checkAdmin, checkUpdateAdmin], AdminController.getAdminById );
-
-router.get("/default-branch", [checkAdmin], SettingController.getDefaultBranch );
-router.put("/default-branch", [checkAdmin, checkUpdateSetting], SettingController.updateDefaultBranch );
 
 
 router.get("/telegram", [checkAdmin], SettingController.getTelegram );
@@ -88,18 +67,8 @@ router.put("/telgram", [checkAdmin, checkUpdateSetting], SettingController.updat
 router.get("/syslogs/:id", [checkAdmin],  UserController.getSystemLogs);
 router.get("/system-logs", [checkAdmin],  UserController.getSystemLogs);
 
-router.get("/default/commission-type", [checkAdmin, checkUpdateSetting], SettingController.getDefaultCommissionType );
-router.put("/default/commission-type", [checkAdmin, checkUpdateSetting], SettingController.updateDefaultCommissionType );
-
 router.get("/user-analytics",[ checkAdmin ], AnalyticsController.getUserAnalytics );
-router.get("/account-analytics",[ checkAdmin ], AnalyticsController.getAccountAnalytics );
-router.get("/deposit-analytics",[ checkAdmin ], AnalyticsController.getDepositAnalytics );
-router.get("/position-analytics",[ checkAdmin ], AnalyticsController.getPosititionAnalytics);
 router.get("/balance-analytics", [checkAdmin], AnalyticsController.getBalanceAnalytics);
-router.get("/user/:id/balance", [checkAdmin], BalanceController.getBalanceInfoForUser);
-
-router.get("/default/commission-type", [checkAdmin, checkUpdateSetting], SettingController.getDefaultCommissionType );
-router.put("/default/commission-type", [checkAdmin, checkUpdateSetting], SettingController.updateDefaultCommissionType );
 
 router.post("/reset-2fa", [checkAdmin, checkUpdateAdmin], AdminController.reset2FA);
 router.get("/roles", [checkAdmin], AdminController.getRoles);

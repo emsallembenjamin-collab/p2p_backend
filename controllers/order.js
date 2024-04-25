@@ -41,9 +41,32 @@ const OrderCancel =async (req, res)=>{
 }
 
 const BuyUSDT = async(req, res)=>{
-    const {accountUuid} = {req}
-    const {order_id} = req.body; 
     
+    const {accountUuid} = req; 
+    const {order_id, amount} = req.body; 
+
+    let result = await OrderService.finishOrder(order_id, accountUuid, amount)
+    
+    if(result){
+        return res.status(200).send("Success")
+    }else{
+        return res.status(500).send("Bad Request");
+    }
+
+}
+
+const SellUSDT = async(req, res)=>{
+    const {accountUuid} = req; 
+    const {order_id, amount} = req.body; 
+
+    let result = await OrderService.finishOrder(order_id, accountUuid, amount)
+    
+    if(result){
+        return res.status(200).send("Success")
+    }else{
+        return res.status(500).send("Bad Request");
+    }
+
 }
 
 const GetBuyOrders = async (req, res)=>{
@@ -63,7 +86,9 @@ const OrderController = {
     OrderSell, 
     OrderCancel, 
     GetBuyOrders,
-    GetSellOrders
+    GetSellOrders,
+    BuyUSDT, 
+    SellUSDT
 }
 
 module.exports = OrderController; 

@@ -1,6 +1,5 @@
 
 
-const ManagerAPI = require('./Manager');
 const { DepositMode, PaymentType, actionStatus, WithdrawMode, PaymentGateway, WithdrawStatus } = require('./constant');
 const uuid = require('uuid');
 const session = require('express-session');
@@ -95,13 +94,7 @@ const _confirmWithdrawal = async (wrUuid) => {
             amount: result.amount * 100,
             comment: result.comment
         }
-        const withdraw_rwsult = await ManagerAPI.Balance.withDrawMoney(data);
-        if (withdraw_rwsult.data.status === OperationTypes.OPERRATION_SUCCESS) {
-            let result_balance = await Database.TradingAccount.updateBalance(result.tradingAccountId, -result.amount);
-            return result_balance;
-        } else {
-            return false;
-        }
+        return true; 
     } catch (e) {
         BotController.errors(e, confirmWithdrawall);
         return false;
@@ -159,6 +152,14 @@ const getTotalDepositAmount = async (req, res, next) => {
     }
 }
 
+const depositUsdt =async (req, res, next)=>{
+
+
+}
+
+const depositFiat = async (req, res, next)=>{
+
+}
 
 
 
@@ -171,5 +172,7 @@ const BalanceController = {
     getWithdrawHistoryForUser,
     getTotalDepositAmount,
     requestWithdrawalManual,
+    depositUsdt, 
+    depositFiat, 
 }
 module.exports = BalanceController; 
