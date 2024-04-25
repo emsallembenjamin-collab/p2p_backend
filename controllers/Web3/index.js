@@ -1,13 +1,9 @@
 const BUSDT_ABI = require("../../abi/busdt_abi.json");
-const USDT_ABI = require("../../abi/usdt_abi.json");
 const BNB_ABI = require("../../abi/bnb_abi.json");
-const ethers = require("ethers");
 const Web3 = require("web3");
-const Database = require("../Database");
 const BotController = require("../Bot");
 const Common = require("ethereumjs-common");
 const Tx = require("ethereumjs-tx");
-const { PaymentType } = require("../constant");
 const busdt_address = "0x55d398326f99059fF775485246999027B3197955"; ///BUSDT Contract
 const bnb_address = "0x242a1ff6ee06f2131b7924cacb74c7f9e3a5edc9";
 

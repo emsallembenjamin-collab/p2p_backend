@@ -53,6 +53,10 @@ exports.DepositStatus = {
     DEPOSIT_FAILED: "FAILED", 
 
 }
+exports.DepositType={
+    USDT: "USDT", 
+    FIAT: "FIAT"
+}
 
 exports.WithdrawStatus ={
     WITHDRAWAL_DONE: "DONE",

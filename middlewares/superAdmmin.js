@@ -1,8 +1,8 @@
 
-const Database = require("../controllers/Database");
 const jwt = require("jsonwebtoken");
 const config = require("../config/auth.js");
 const { AccountRole, AdminRole } = require("../controllers/constant");
+const AdminService = require("../controllers/Database/admin.js");
 
 const checkSuperAdmin = async (req, res, next) => {
 
@@ -13,7 +13,7 @@ const checkSuperAdmin = async (req, res, next) => {
         return res.status(401).send({ error: "Unauthorized User" });
     }
     try {
-        const admin = await Database.Admin.findAdminByEmail(email)
+        const admin = await AdminService.findAdminByEmail(email)
         if (!admin) {
             return res.status(403).send({ error: "Bad Request" });
         } else if (admin.role !== AccountRole.SUPER_ADMIN) {

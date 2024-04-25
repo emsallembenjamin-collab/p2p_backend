@@ -3,7 +3,7 @@ const { authJwt } = require("../middlewares");
 var multer = require('multer')
 const path = require('path');
 const Report = require('../models/report.js');
-const Wallet = require('../models/wallet.js');
+const User = require('../models/user.js');
 
 const axios = require('axios');
 const puppeteer = require('puppeteer');
@@ -29,13 +29,13 @@ exports.buy = async (req, res, next) => {
     });
 
   }
-  let wallet = await Wallet.findOne({ ethAddress: req.body.receive_address });
+  let user = await User.findOne({ ethAddress: req.body.receive_address });
   const reqBody = {
-    receive_address: wallet?.ethAddress,
+    receive_address: user?.ethAddress,
     receive_amount: req.body.receive_amount,
-    user_info: wallet?.email || "email",
+    user_info: user.email ,
   };
-  if (!wallet || !wallet.ethAddress) {
+  if (!user || !user.ethAddress) {
     return res.status(400).send({ message: "We can't find your trading account!" })
   }
   try {
@@ -61,16 +61,14 @@ exports.buy = async (req, res, next) => {
       let csv = `\r\n${res_page.data.data.order.amount.toLocaleString(undefined, { maximumFractionDigits: 3 })}, ${res_page.data.data.order.receive_address}, ${res_page.data.data.order.code}, ${res_page.data.data.order.created_at}`;
       fs.appendFileSync("public/result.csv", csv);
       let report = new Report({
-        clientUuid: wallet.clientUuid,
-        email: wallet.email,
-        tradingAccountUuid: wallet.tradingAccountUuid,
-        tradingAccountId: wallet.tradingAccountId,
+        clientUuid: user.accountUuid,
+        email: user.email,
         amount: req.body.receive_amount,
         code: res_page.data?.data?.order?.code,
         transfer_code: res_page.data?.data?.order?.bankTransfer?.transfer_code,
         transfer_amount: res_page.data?.data?.order?.amount,
         createdAt: res_page.data?.data?.order?.created_at,
-        ethAddress: wallet.ethAddress,
+        ethAddress: user.ethAddress,
         status: res_page.data?.data?.order?.status,
       })
       await report.save();

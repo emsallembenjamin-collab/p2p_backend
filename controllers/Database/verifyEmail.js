@@ -33,7 +33,7 @@ const deleteVerifyEmail = async (email) => {
     }
 }
 
-const VerifyEmailController = {
+const VerifyEmailService = {
     createVerifyEmail, getVerifyEmail, deleteVerifyEmail
 }
-module.exports = VerifyEmailController; 
+module.exports = VerifyEmailService; 

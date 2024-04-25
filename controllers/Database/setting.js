@@ -93,8 +93,8 @@ const getSettingInfo = async () => {
 }
 
 
-const SettingModel = {
+const SettingService = {
     updateDefaultBranch, updateTelegram, updateCommissionType, getDefaultBranch, getSettingInfo, getTelegram, getCommissionType, 
 }
 
-module.exports = SettingModel;
+module.exports = SettingService;

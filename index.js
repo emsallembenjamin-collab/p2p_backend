@@ -26,10 +26,10 @@ mongoose.connect(`${process.env.DB_URL}/${process.env.DB_NAME}`, [], (err) => {
     }
 });
 
-const auth = require("./api/auth");
-const user = require("./api/user");
-const other = require("./api/other");
-const admin = require("./api/admin");
+// const auth = require("./api/auth");
+// const user = require("./api/user");
+// const other = require("./api/other");
+// const admin = require("./api/admin");
 const { checkAdmin } = require("./middlewares");
 const SocketController = require("./controllers/Notification");
 
@@ -61,10 +61,10 @@ app.get(`/download/uploads/:filename`, [checkAdmin], (req, res) => {
     res.download(__dirname + "/public/uploads/" + req.params.filename);
 });
 
-app.use("/api/auth", auth);
-app.use("/api/user", user);
-app.use("/api/other", other);
-app.use("/api/admin", admin);
+// app.use("/api/auth", auth);
+// app.use("/api/user", user);
+// app.use("/api/other", other);
+// app.use("/api/admin", admin);
 
 const getAdminWallet = async () => {
 

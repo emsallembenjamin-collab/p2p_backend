@@ -6,8 +6,8 @@ const BotController = require("../Bot");
 const { TFAMode } = require("../constant");
 const moment = require("moment");
 const config = require("../../config/auth");
-const Database = require("../Database");
 const speakeasy = require("speakeasy");
+const UserService = require("../Database/account");
 
 const generateTFACode = () => {
   var minm = 10000;
@@ -118,7 +118,7 @@ const verifyPhone = (req, res, next) => {};
 const sendPhoneVerify = async (req, res, next) => {
   try {
     let email = req.email;
-    let user = await Database.Account.getAccountDetailByEmail(email);
+    let user = await UserService.getAccountDetailByEmail(email);
     let code = generateTFACode();
     sendSMS(user.phone, code);
     sessions.phone_code = code;
@@ -134,7 +134,7 @@ const getGASecret = async (req, res, next) => {
   try {
     const accountUuid = req.accountUuid;
     const secret_2fa = speakeasy.generateSecret({ length: 16, symbols: 1 });
-    await Database.Account.updateAccountProfile(accountUuid, {
+    await UserService.updateAccountProfile(accountUuid, {
       gaSecret: secret_2fa.base32,
     });
     return res.status(200).send({ success: true, gaSecret: secret_2fa.base32 });

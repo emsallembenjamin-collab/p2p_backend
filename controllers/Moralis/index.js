@@ -1,9 +1,9 @@
 const Moralis = require("moralis").default;
 const Chains = require("@moralisweb3/common-evm-utils");
 const axios = require('axios');
-const Wallet = require('../../models/wallet')
 const BUSDT_ABI = require("../../abi/busdt_abi.json");
 const BotController = require("../Bot");
+const User = require("../../models/user");
 const tab_name ="p2p"; 
 const Options= {
     id: ""
@@ -106,7 +106,7 @@ const initMoralis = async ()=> {
             apiKey: process.env.MORALIS_KEY,
         });
         
-        let wallets = await Wallet.find({});
+        let wallets = await User.find({});
         let wallet_addresses = [];
         for (let index = 0; index < wallets.length; index++) {
             const element = wallets[index];

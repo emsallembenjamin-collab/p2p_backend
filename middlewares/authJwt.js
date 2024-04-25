@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const config = require("../config/auth.js");
 const User = require("../models/user");
 const Role = require("../models/role");
-const Database = require("../controllers/Database/index.js");
+const UserService = require("../controllers/Database/account.js");
 
 const verifyToken = (req, res, next) => {
   let token = req.headers["authorization"];
@@ -35,7 +35,7 @@ const verifyTFAToken =async  (req, res, next) => {
     }
     let decode = jwt.verify(token, config.tfa_secret);
     req.email = decode.email; 
-    const user = await Database.Account.getAccountDetailByEmail(decode.email); 
+    const user = await UserService.getAccountDetailByEmail(decode.email); 
     req.user= user; 
     next();
   } catch (e) {

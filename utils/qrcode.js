@@ -1,8 +1,8 @@
 const QRCode = require('qrcode');
-const Wallet = require('../models/wallet');
-const Database = require('../controllers/Database');
 const { Dir } = require('fs');
 const path = require('path');
+const { KYCStatus } = require('../controllers/constant');
+const User = require('../models/user');
 
 exports.generateQRcodeOfWallet = (address) => {
     const outputPath = path.join(__dirname, '../public/qrcode/', `${address}.svg`);
@@ -19,7 +19,7 @@ exports.generateQRcodeOfWallet = (address) => {
 };
 
 exports.generateAllQrcode =async (req,res) =>{
-    const tradingAccounts =await Wallet.find({isDemo: false}); 
+    const tradingAccounts =await User.find({verification_status: KYCStatus.APPROVED}); 
     for(let tradingAccount of tradingAccounts){
         try{
               this.generateQRcodeOfWallet(tradingAccount.ethAddress)

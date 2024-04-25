@@ -1,8 +1,8 @@
 
-const Database = require("../controllers/Database");
 const jwt = require("jsonwebtoken");
 const config = require("../config/auth.js");
 const { AccountRole, AdminRole } = require("../controllers/constant");
+const RoleService = require("../controllers/Database/role.js");
 
 const checkAdmin = async (req, res, next) => {
     const admin = getEmailFromToken(req);
@@ -110,7 +110,7 @@ const checkRole = async (permission, admin)=>{
         return true; 
     } else {
         if(!admin.subRole) return false; 
-        let role = await Database.Role.getRole(admin.subRole)
+        let role = await RoleService.getRole(admin.subRole)
         if (role.permissions.findIndex(item => item === permission) !== -1) {
             return true; 
         } else {

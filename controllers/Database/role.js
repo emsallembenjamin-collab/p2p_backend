@@ -52,8 +52,8 @@ const deleteRole = async (data) =>{
         return false; 
     }
 }
-const RoleController = {
+const RoleService = {
     createRole, getRole, updateRole, getRoles, deleteRole
 }
 
-module.exports = RoleController; 
+module.exports = RoleService; 

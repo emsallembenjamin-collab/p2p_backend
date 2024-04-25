@@ -1,6 +1,5 @@
 
 
-const Database = require('./Database');
 const ManagerAPI = require('./Manager');
 const { DepositMode, PaymentType, actionStatus, WithdrawMode, PaymentGateway, WithdrawStatus } = require('./constant');
 const uuid = require('uuid');

@@ -110,7 +110,7 @@ const generateSecret = (email) => {
   return secret.base32;
 };
 
-const AdminController = {
+const AdminService = {
   findAdminByEmail,
   createAdmin,
   updateAdminInfo,
@@ -118,4 +118,4 @@ const AdminController = {
   findAdminByUuid,
   generateSecret,
 };
-module.exports = AdminController;
+module.exports = AdminService;

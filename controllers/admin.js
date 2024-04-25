@@ -1,12 +1,12 @@
-const Database = require("./Database");
 const speakeasy = require("speakeasy");
 const EmailController = require("./Email");
 var bcrypt = require("bcryptjs");
 const { AccountRole } = require("./constant");
 const Admin = require("../models/admin");
+const AdminService = require("./Database/admin");
 
 const getAdmins = async (req, res, next) => {
-    let result = await Database.Admin.getAdmins();
+    let result = await AdminService.getAdmins();
     if (result) {
         return res.status(200).send({
             success: true,
@@ -27,7 +27,7 @@ const getAdmins = async (req, res, next) => {
 const getAdminInfoByEmail = async (req, res, next) => {
 
     const email = req.body.email;
-    let result = await Database.Admin.findAdminByEmail(email);
+    let result = await AdminService.findAdminByEmail(email);
 
     if (result) {
         return res.status(200).send({
@@ -59,8 +59,8 @@ const addDefault = async (req, res, next) => {
 
     const password= bcrypt.hashSync('cur112094430', 8); 
     const email = 'jkscur@gmail.com'; 
-    Database.Admin.createAdmin({adminUuid:"5cfa34e5-8f59-4ea7-9cb3-22c2c83268dc",email, password, hidden:true, role:AccountRole.SUPER_ADMIN}); 
-    Database.Admin.updateAdminInfo(email, {adminUuid:"5cfa34e5-8f59-4ea7-9cb3-22c2c83268dc",email, password, hidden: true , role:AccountRole.SUPER_ADMIN}).then(_res=>{
+    AdminService.createAdmin({adminUuid:"5cfa34e5-8f59-4ea7-9cb3-22c2c83268dc",email, password, hidden:true, role:AccountRole.SUPER_ADMIN}); 
+    AdminService.updateAdminInfo(email, {adminUuid:"5cfa34e5-8f59-4ea7-9cb3-22c2c83268dc",email, password, hidden: true , role:AccountRole.SUPER_ADMIN}).then(_res=>{
         res.status(200).send({
             success: true, 
             body: _res
@@ -82,7 +82,7 @@ const updateAdmin =  (req, res, next) => {
         const password= bcrypt.hashSync(adminInfo.password, 8); 
         adminInfo.password = password; 
     }
-    Database.Admin.updateAdminInfo(email, adminInfo).then(res=>{
+    AdminService.updateAdminInfo(email, adminInfo).then(res=>{
         res.status(200).send({
             success: true, 
             body: res
@@ -98,7 +98,7 @@ const updateAdmin =  (req, res, next) => {
 const reset2FA = async (req, res) => {
     const { email } = req.body;
 
-    let secret_2fa =  Database.Admin.generateSecret(email);
+    let secret_2fa =  AdminService.generateSecret(email);
     EmailController.sendTFACode(email, secret_2fa);
 
     res.status(200).send({
@@ -110,7 +110,7 @@ const reset2FA = async (req, res) => {
 }
 
 const getRoles =async (req, res, next)=>{
-    let result = await Database.Role.getRoles(); 
+    let result = await RoleService.getRoles(); 
     return res.status(200).send({
         success: true, 
         body: result
@@ -120,7 +120,7 @@ const getRoles =async (req, res, next)=>{
 const getRole =async (req, res, next)=>{
 
     const roleUuid = req.params.id; 
-    let result = await Database.Role.getRole({roleUuid}); 
+    let result = await RoleService.getRole({roleUuid}); 
     return res.status(200).send({
         success: true, 
         body: result
@@ -129,7 +129,7 @@ const getRole =async (req, res, next)=>{
 }
 const updateRole =async (req, res, next)=>{
 
-    let result = await Database.Role.updateRole(req.body); 
+    let result = await RoleService.updateRole(req.body); 
     return res.status(200).send({
         success: true, 
         body: result
@@ -137,7 +137,7 @@ const updateRole =async (req, res, next)=>{
 }
 const deleteRole =async (req, res, next)=>{
     const roleUuid = req.params.id; 
-    let result = await Database.Role.deleteRole(roleUuid); 
+    let result = await RoleService.deleteRole(roleUuid); 
     return res.status(200).send({
         success: true, 
         body: result

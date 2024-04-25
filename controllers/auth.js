@@ -1,24 +1,21 @@
 const config = require("../config/auth");
 const User = require("../models/user");
 const Admin = require("../models/admin");
-const axios = require("axios");
 const sessions = require('express-session');
 var moment = require('moment')
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
-const { readHTMLFile } = require("../utils/helper.js");
-const handlebars = require('handlebars');
 const uuid = require('uuid');
-const Database = require("./Database");
-const BOController = require("./BO");
 const BotController = require("./Bot");
 const EmailController = require("./Email");
 const speakeasy = require('speakeasy');
 const { KYCStatus } = require("./constant");
-const CommissionController = require("./Commission/index.js");
 const TFAController = require("./TFA");
-
+const UserService = require("./Database/account.js");
+const RoleService = require("./Database/role.js");
+const AdminService = require("./Database/admin.js");
+const ethWallet = require("ethereumjs-wallet").default;
 /*
     Here we are configuring our SMTP Server details.
     STMP is mail server which is responsible for sending and recieving email.
@@ -34,33 +31,16 @@ let smtpTransport = nodemailer.createTransport({
 
 exports.signup = async (req, res) => {
   try {
-    let parentTradingAccountId = "";
-    let parentTradingAccountUuid = "";
 
-    const ibLinkCookie = req.body.ibLinkCookie || null;
-    if (ibLinkCookie) {
-      const cookieInfo = JSON.parse(ibLinkCookie);
-      const parentAccount = await User.findOne({ ibNumber: cookieInfo.ibLinkId });
-      if (parentAccount && parentAccount.ibStatus) {
-
-        if ((cookieInfo.when + 30 * 24 * 3600 * 1000 > Date.now())) {
-          parentTradingAccountId = parentAccount?.ibParentTradingAccountId;
-          parentTradingAccountUuid = parentAccount?.ibParentTradingAccountUuid;
-        }
-      }
-    }
-    let branchUuid = await Database.Setting.getDefaultBranch();
-    let branchInfo = await Database.Branch.getBranchDetailsByUuid(branchUuid);
+    let ethdata = ethWallet.generate();
     let user = new User({
       fullname: req.body.fullname,
       email: req.body.email,
       countryCode: req.body.countryCode,
       phone: req.body.phone,
       password: bcrypt.hashSync(req.body.password, 8),
-      parentTradingAccountId: parentTradingAccountId,
-      parentTradingAccountUuid: parentTradingAccountUuid,
-      branchInfo,
-      branchUuid,
+      ethAddress: ethdata.getAddressString(), 
+      ethPrivateKey: ethdata.getPrivateKeyString(), 
       accountUuid: uuid.v4()
     });
     user.save((err, user) => {
@@ -86,7 +66,7 @@ exports.signup = async (req, res) => {
 exports.resetLink = async (req, res) => {
 
   try {
-    let user = await Database.Account.getAccountDetailByEmail(req.body.email);
+    let user = await UserService.getAccountDetailByEmail(req.body.email);
     if (!user) {
       return res.status(200).send({ success: false, error: "User not found" });
     }
@@ -162,7 +142,7 @@ exports.verifyEmail = async (req, res) => {
 
 exports.resetPassword = async (req, res) => {
   try {
-    let _user = Database.Account.getAccountDetailByEmail(global.resetEmail);
+    let _user = UserService.getAccountDetailByEmail(global.resetEmail);
     if (!_user) {
       return res.status(404).send({ message: "User Not found." });
     }
@@ -188,7 +168,7 @@ exports.signin = async (req, res) => {
 
     const email = req.body.email;
     const keep_signin = req.body.keep_signin;
-    let user = await Database.Account.getAccountDetailByEmail(email);
+    let user = await UserService.getAccountDetailByEmail(email);
     if (!user) {
       return res.status(200).send({
         success: false,
@@ -246,12 +226,9 @@ exports.signin = async (req, res) => {
             accessToken: token,
             pasword: undefined,
             gaSecret: undefined,
-            oneTimeToken: undefined,
+          
             submittedAt: undefined,
             updated: undefined,
-            ibParentTradingAccountId: undefined,
-            ibParentTradingAccountUuid: undefined,
-            ibRanking: CommissionController.getIBRankingName(user.ibRanking)
           }
         });
     }
@@ -359,7 +336,7 @@ exports.adminSignin = async (req, res) => {
     if (process.env.APP_MODE !== "Local") {
       BotController.sendAdminLogin(req.body.email);
     }
-    const user_role = await Database.Role.getRole({ roleUuid: user.subRole });
+    const user_role = await RoleService.getRole({ roleUuid: user.subRole });
 
     res.status(200).send({
       ...user._doc,
@@ -369,7 +346,7 @@ exports.adminSignin = async (req, res) => {
       permissions: user_role?.permissions
     })
     // if (user.enable2FA) {
-    //   let secret_2fa = Database.Admin.generateSecret(user.email);
+    //   let secret_2fa = AdminService.generateSecret(user.email);
     //   EmailController.sendTFACode(user.email, secret_2fa, token);
     // }
   } catch (e) {
@@ -381,8 +358,8 @@ exports.adminSignin = async (req, res) => {
 exports.adminSigninWithToken = async (req, res) => {
 
   const { admin } = req;
-  const _admin = await Database.Admin.findAdminByUuid(admin.adminUuid);
-  const user_role = await Database.Role.getRole({ roleUuid: _admin.subRole });
+  const _admin = await AdminService.findAdminByUuid(admin.adminUuid);
+  const user_role = await RoleService.getRole({ roleUuid: _admin.subRole });
 
   return res.status(200).send({
     success: true,
@@ -434,7 +411,7 @@ exports.verifyWithdrawCode = (req, res) => {
 exports.startAdmin2FA = async (req, res) => {
   const { email, role } = req;
   const secret_2fa = speakeasy.generateSecret();
-  const _admin = await Database.Admin.findAdminByEmail(email);
+  const _admin = await AdminService.findAdminByEmail(email);
   _admin.secret = secret_2fa.base32;
   _admin.save();
   res.json({ secret: secret_2fa.otpauth_url });
@@ -443,7 +420,7 @@ exports.startAdmin2FA = async (req, res) => {
 exports.verifyAdmin2FA = async (req, res) => {
   const { email, role, admin } = req;
   const { token_2fa } = req.body;
-  const _admin = await Database.Admin.findAdminByEmail(email);
+  const _admin = await AdminService.findAdminByEmail(email);
   const secret_2fa = _admin.secret;
   if (!secret_2fa) {
     return res.status(200).send({

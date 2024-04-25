@@ -1,14 +1,11 @@
 const Account = require('../../models/user');
 const uuid = require('uuid');
 const bcrypt = require('bcryptjs');
-const { IBStatus, AccountRole, KYCStatus } = require('../constant');
+const { KYCStatus } = require('../constant');
 const BotController = require('../Bot');
 const { update } = require('../../models/admin');
 const { getSyslogsForUser } = require('./syslogs');
 const { ObjectId } = require('mongodb');
-const { MakeSimpleEmail } = require('../Manager/utility/other');
-const Position = require('../../models/position');
-const Wallet = require('../../models/wallet');
 
 const createAccountSync = async (data) => {
     try {
@@ -64,7 +61,6 @@ const getUsers = async (adminUuid, role) => {
                     docUrl3: 1, 
                     fullname: 1, 
                     avatarUrl: 1, 
-                    branchUuid: 1, 
                 }
             },
             {

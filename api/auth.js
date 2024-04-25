@@ -2,9 +2,8 @@ var router = require("express").Router();
 const { authJwt, verifySignUp, checkAdmin, checkAdminWithout2FA, checkSuperAdmin } = require("../middlewares");
 const controller = require("../controllers/auth");
 const UserController = require("../controllers/customer");
-const Database = require("../controllers/Database");
-const CommissionController = require("../controllers/Commission");
 const TFAController = require("../controllers/TFA");
+const UserService = require("../controllers/Database/account");
 
 router.get("/admins",[checkSuperAdmin] ,controller.getAdmins);
 router.post("/admin",  [verifySignUp.checkDuplicateAdminNameOrEmail],  controller.updateAdmin);
@@ -29,14 +28,13 @@ router.post('/verify-2fa', controller.verifyAdmin2FA )
 router.get('/get-2fa', controller.getAdmin2FA); 
 router.post("/verify-2fa", [checkAdminWithout2FA], controller.verifyAdmin2FA );
 router.post("/signinWithToken",[authJwt.verifyToken], async (req, res, next)=>{
-    const user =await Database.Account.getAccountDetailByUuid(req.accountUuid); 
+    const user =await UserService.getAccountDetailByUuid(req.accountUuid); 
     res.status(200).send({
         success: true, 
         body: {
          ...user._doc,
          password: undefined, 
          oneTimeToken: undefined, 
-         ibRanking: CommissionController.getIBRankingName(user.ibRanking)
         }
     });
 });

@@ -1,4 +1,3 @@
-const BOController = require("../controllers/BO");
 const Admin = require("../models/admin");
 const User = require("../models/user");
 const ROLES = ["user", "admin", "moderator"];
@@ -21,23 +20,9 @@ const checkDuplicateUsernameOrEmail = (req, res, next) => {
       return;
     }
 
-    BOController.Account.checkEmailFromBO(req.body.email).then(
-      exist_result=>{
-        if(exist_result){
-          res.status(200).send({
-            success: false, 
-            error: "You can't use this email. This email already in Use."
-          })
-        }else{
-          next();
-        }
-      }
-    ).catch(e=>{
-      res.status(200).send({
-        success: false, 
-        error: "Try with another email. You can't use this email for register."
-      })
-    }); 
+    res.status(200).send({
+      success: true,
+    })
   });
 }
 const checkDuplicateAdminNameOrEmail = (req, res, next) => {

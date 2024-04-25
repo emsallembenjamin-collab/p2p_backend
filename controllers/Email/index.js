@@ -1,5 +1,6 @@
 const { readHTMLFile } = require("../../utils/helper.js");
 const BotController = require("../Bot/index.js");
+const MailService = require("../Database/mail.js");
 const { templateNames, replaceData, messageContent } = require('./constant.js')
 const handlebars = require('handlebars');
 const nodemailer = require("nodemailer");
@@ -37,13 +38,12 @@ const sendEmail = async (template, data, toEmail, subject) => {
             html: htmlToSend
         };
         smtpTransport.sendMail(mailOptions, async (error, response) => {
-            const Database = require("../Database"); 
             if (error) {
-                await Database.Mail.createMail({ email: toEmail, subject, status: "Failed" });
-                BotController.error(error, "SendEmail"); 
+                await MailService.createMail({ email: toEmail, subject, status: "Failed" });
+                BotController.errors(error, "SendEmail"); 
                 console.log(error);
             } else {
-                await Database.Mail.createMail({ email: toEmail, subject, status: "Succeed" });
+                await MailService.createMail({ email: toEmail, subject, status: "Succeed" });
                 console.log("Message sent: " + response.response);
             }
         });

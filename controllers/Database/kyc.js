@@ -34,8 +34,8 @@ const updateKYCSetting =async (data)=>{
     }
 }
 
-const KYCController = {
+const KYCService = {
     getKYCSetting, updateKYCSetting
 }
 
-module.exports = KYCController; 
+module.exports = KYCService; 

@@ -208,7 +208,7 @@ const getSyslogsForUser = async (email) => {
         return false;
     }
 }
-const SysLogController = {
+const LogService = {
     createSystemLog, getSysteLogs,
     logUserCreateTradingAccount,
     logUserIBRequest,
@@ -228,4 +228,4 @@ const SysLogController = {
     getSyslogsForUser,
 }
 
-module.exports = SysLogController;
+module.exports = LogService;
