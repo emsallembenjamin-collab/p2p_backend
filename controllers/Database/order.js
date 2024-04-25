@@ -6,6 +6,7 @@ const uuid = require('uuid');
 const { OrderStates, OrderType } = require("../constant");
 const { or } = require("sequelize");
 const e = require("express");
+const BotController = require("../Bot");
 
 const createOrder = async (data) => {
     const order_id = uuid.v4();
@@ -14,6 +15,7 @@ const createOrder = async (data) => {
     if(amount <0 || price <0) return false; 
 
     const user =await User.findOne({accountUuid: clientUuid}); 
+    if(!user) return false;
     if (order_type == OrderType.BUY) {
         if (user.fiatBalance  < user.fiatLock + amount *price * 1.004)
             return false
@@ -28,7 +30,8 @@ const createOrder = async (data) => {
 
     const order = new Order({
         ...data,
-        order_id
+        order_id,
+        createdAt: (new Date).getTime()
     });
     try {
         await user.save()
@@ -107,16 +110,15 @@ const updateOrderAmount = async (order_id, amount) => {
 }
 const cancelOrder =async (order_id, clientUuid) => {
 
-    const order = await Order.findOne({ order_id: order_id });
-    if (!order || order.status !== OrderStates.New || order.clientUuid !== clientUuid) {
+    const order = await Order.findOne({ order_id, clientUuid });
+    if (!order) {
         return false;
     }
-
-    const user = User.findOne({accountUuid: order.clientUuid}); 
+    const user = await User.findOne({accountUuid: clientUuid}); 
     if(order.order_type === OrderType.BUY){
-        user.fiatLock -= order.amount * order.price * 1.004; 
+        user.fiatLock -=user.fiatLock - order.amount * order.price * 1.004; 
     }else if(order.order_type === OrderType.SELL){
-        user.usdtLock -= order.amount;
+        user.usdtLock -= user.usdtLock - order.amount;
     }
 
     order.state = OrderStates.CANCELLED; 
@@ -185,15 +187,58 @@ const updateStatus = (orderId, status) => {
 }
 
 const findBuyOrders = async () =>{
-    const orders = await Order.find({order_type: OrderType.BUY, state: OrderStates.New});
+    const orders = await findOrders({order_type: OrderType.BUY, state: OrderStates.New});
     return orders; 
 }
 
 const findSellOrders = async () =>{
-    const orders = await Order.find({order_type: OrderType.SELL, state: OrderStates.New});
+    const orders = await findOrders({order_type: OrderType.SELL, state: OrderStates.New});
     return orders; 
 }
 
+const findOrders = async(match)=>{
+    try{
+        const orders = await Order.aggregate([
+            {
+                $match: {...match}
+            },
+            {
+                $lookup:{
+                    from: "users",
+                    foreignField: "accountUuid",
+                    localField: "clientUuid",
+                    as:"userData"
+                }
+            }, 
+            {
+                $unwind: "$userData"
+            },
+            {
+                $project: {
+                    amount: 1, 
+                    price: 1, 
+                    order_id:1, 
+                    order_type:1, 
+                    username: "$userData.fullname",
+                    clientUuid: 1, 
+                    state: 1, 
+                    createdAt:1
+                }
+            },
+            {
+                $sort: {
+                    createdAt: -1
+                }
+            }
+         ])
+        return orders; 
+    }catch(e){
+        console.log(e);
+        BotController.errors(e, "findOrders")
+        return false; 
+    }
+    
+}
 const OrderService = {
     createOrder,
 

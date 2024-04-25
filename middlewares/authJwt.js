@@ -6,7 +6,6 @@ const UserService = require("../controllers/Database/account.js");
 
 const verifyToken = (req, res, next) => {
   let token = req.headers["authorization"];
-  console.log(token);
   try {
     let token = req.headers["authorization"];
     if (!token) {

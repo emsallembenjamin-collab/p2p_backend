@@ -38,8 +38,9 @@ router.post("/deposite/fiat", [authJwt.verifyToken], BalanceController.depositFi
 router.post("/order/buy", [authJwt.verifyToken], OrderController.OrderBuy )
 router.post("/order/sell", [authJwt.verifyToken], OrderController.OrderSell)
 router.post("/order/cancel", [authJwt.verifyToken], OrderController.OrderCancel)
-router.post("/sell", [authJwt.verifyToken], OrderController.SellUSDT )
-router.post("/buy", [authJwt.verifyToken], OrderController.BuyUSDT)
+router.post("/order/process", [authJwt.verifyToken], OrderController.ProcessOrder )
+router.get("/orders/buy", [authJwt.verifyToken], OrderController.GetBuyOrders)
+router.get("/orders/sell", [authJwt.verifyToken], OrderController.GetSellOrders)
 
 
 module.exports = router;

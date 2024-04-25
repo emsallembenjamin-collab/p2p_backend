@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { PaymentType } = require("../controllers/constant");
+const { PaymentType, OrderType, OrderStates } = require("../controllers/constant");
 const Order = mongoose.model(
   "Orders",
   new mongoose.Schema({
@@ -13,24 +13,18 @@ const Order = mongoose.model(
         required: true
     },
     order_type: {
-        type: String,
-        enum: ['Sll', 'Buy'],
-        required: true
+        type: Number,
     },
     amount: {
         type: Number,
         required: true
     },
     state: {
-        type: String,
-        enum: ['Pending', 'Completed', 'Cancelled', 'New'],
-        required: true,
-        default: 'Pending'
-    },
-    node: {
-        type: String,
-        required: true
-    }
+        type: Number,
+        default:  OrderStates.New
+    }, 
+    price: Number, 
+    createdAt: Date
   })
 );
 module.exports = Order;

@@ -50,10 +50,22 @@ const User = mongoose.model(
     ethPrivateKey:        String,
     tronAddress:          String,
     tronPrivateKey:       String,
-    usdtBalance: Number, 
-    usdtLock: Number, 
-    fiatBalance: Number, 
-    fiatLock: Number, 
+    usdtBalance:{
+      type: Number, 
+      default: 0
+    }, 
+    usdtLock:{
+      type: Number, 
+      default: 0
+    }, 
+    fiatBalance: {
+      type: Number, 
+      default:0
+    }, 
+    fiatLock:{
+      type: Number, 
+      default:0
+    }, 
     bnbBalance: Number, 
     bnbLock: Number, 
   })

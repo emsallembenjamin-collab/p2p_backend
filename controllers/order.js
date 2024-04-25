@@ -4,9 +4,10 @@ const OrderService = require('./Database/order');
 
 
 const OrderBuy = async(req, res)=>{
-    const {accountUuid} = {req}
+    const {accountUuid} = req
     const {amount, price} = req.body; 
 
+    console.log({accountUuid})
     const result = await OrderService.createOrder({clientUuid: accountUuid, amount, price, order_type: OrderType.BUY}); 
     if(result){
         return res.status(200).send(result);
@@ -17,7 +18,7 @@ const OrderBuy = async(req, res)=>{
 
 const OrderSell = async (req, res)=>{
     
-    const {accountUuid} = {req}
+    const {accountUuid} = req
     const {amount, price} = req.body; 
     const result = await OrderService.createOrder({clientUuid: accountUuid, amount, price, order_type: OrderType.SELL}); 
 
@@ -29,7 +30,7 @@ const OrderSell = async (req, res)=>{
 
 }
 const OrderCancel =async (req, res)=>{
-    const {accountUuid} = {req}
+    const {accountUuid} = req
     const {order_id} = req.body; 
     const result = await OrderService.cancelOrder(order_id, accountUuid ); 
 
@@ -37,10 +38,10 @@ const OrderCancel =async (req, res)=>{
         return res.status(200).send(result);
     }else{
         return res.status(500).send("Bad Request");
-    }
+    }   
 }
 
-const BuyUSDT = async(req, res)=>{
+const ProcessOrder = async(req, res)=>{
     
     const {accountUuid} = req; 
     const {order_id, amount} = req.body; 
@@ -55,19 +56,6 @@ const BuyUSDT = async(req, res)=>{
 
 }
 
-const SellUSDT = async(req, res)=>{
-    const {accountUuid} = req; 
-    const {order_id, amount} = req.body; 
-
-    let result = await OrderService.finishOrder(order_id, accountUuid, amount)
-    
-    if(result){
-        return res.status(200).send("Success")
-    }else{
-        return res.status(500).send("Bad Request");
-    }
-
-}
 
 const GetBuyOrders = async (req, res)=>{
     const {accountUuid} = {req}
@@ -87,8 +75,7 @@ const OrderController = {
     OrderCancel, 
     GetBuyOrders,
     GetSellOrders,
-    BuyUSDT, 
-    SellUSDT
+    ProcessOrder, 
 }
 
 module.exports = OrderController; 
