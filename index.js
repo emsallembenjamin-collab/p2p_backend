@@ -93,5 +93,4 @@ app.listen(PORT, async () => {
     Moralis.initMoralis();
     getAdminWallet(); 
     SocketController.initSecketServer();
-
 }); 

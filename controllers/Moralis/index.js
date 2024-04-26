@@ -116,11 +116,12 @@ const initMoralis = async ()=> {
             wallet_addresses.push(element.ethAddress);
         }
 
-        let id =await  getStreamID()
+        let id =await getStreamID()
         Options.id = id; 
         
         if(!id){
             id = await createStream(); 
+            Options.id = id;
         }
 
         if (wallet_addresses.length > 0) {

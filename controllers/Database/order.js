@@ -220,6 +220,7 @@ const findOrders = async(match)=>{
                     order_id:1, 
                     order_type:1, 
                     username: "$userData.fullname",
+                    avatarUrl: "$userData.avatarUrl",
                     clientUuid: 1, 
                     state: 1, 
                     createdAt:1
