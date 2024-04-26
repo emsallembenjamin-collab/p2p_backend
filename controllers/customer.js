@@ -11,6 +11,8 @@ const DepositHistory = require("../models/deposit_history");
 const UserService = require("./Database/account");
 const VerifyEmailService = require("./Database/verifyEmail");
 const LogService = require("./Database/syslogs");
+const User = require("../models/user");
+const BalanceController = require("./balance");
 const client = new OAuth2Client(`${process.env.GOOGLE_CLIENT_ID}`);
 
 const getUsers = async (req, res, next) => {
@@ -496,117 +498,126 @@ const updateTfa = async (req, res, next) => {
 
 const webhook = async (req, res, next) => {
     const transactions = req.body.erc20Transfers;
-    if (!req.body.confirmed) {
-        return res.status(200).send("Not confirmed");
-    } else if (transactions.length == 0 && transactions) {
-        return res.status(200).send('Verified');
-    }
 
+    if (!req.body.confirmed) {
+      return res.status(200).send("Not confirmed");
+    }else if(transactions.length == 0 && transactions){
+      return res.status(200).send('Verified'); 
+    }
+  
     console.log("process");
     if (transactions?.length > 0) {
-        const element = transactions[0];
-        const deposit_amount = element.valueWithDecimals;
-        if (deposit_amount <= 0) {
-            return res.status(200).send("Value is 0");
+      const element = transactions[0];
+      const deposit_amount = element.valueWithDecimals;
+      if (deposit_amount <= 0) {
+        return res.status(200).send("Value is 0");
+      }
+      let history = await DepositHistory.findOne({
+        txhash: element?.transactionHash,
+      });
+      if (history) {
+        if (history.status == 4) {
+          return res.status(200).send("Processed already!");
         }
-        let history = await DepositHistory.findOne({
-            txhash: element?.transactionHash,
-        });
-        if (history) {
-            if (history.status == 4) {
-                return res.status(200).send("Processed already!");
-            }
-        } else {
-            history = new DepositHistory({ txhash: element?.transactionHash });
-            await history.save();
+      } else {
+        history = new DepositHistory({ txhash: element?.transactionHash });
+        await history.save();
+      }
+      const wallet_address = element.to;
+      User.findOne({ ethAddress: wallet_address }).exec(async (err, user) => {
+        if (err || !user) {
+          return res.status(200).send("Couldn't find a wallet of this address!");
         }
-        const wallet_address = element.to;
-        Wallet.findOne({ ethAddress: wallet_address }).exec(async (err, wallet) => {
-            if (err || !wallet) {
-                return res.status(200).send("Couldn't find a wallet of this address!");
-            }
-            try {
-                if (history.status == 0) {
-                    BotController.depositByWallet(
-                        wallet.email,
-                        deposit_amount,
-                        wallet_address,
-                        wallet.tradingAccountId
-                    );
-                    history.status = 1;
-                }
-            } catch (error) {
-                return res.status(500).send("Error");
-                console.log(error);
-            }
-            const contract = new web3.eth.Contract(BNB_ABI, bnb);
-            const usdtContract = new web3.eth.Contract(BUSDT_ABI, busdt);
-
-            let sender = global.ADMIN_WALLET_ADDRESS;
-            let receiver = wallet_address;
-            let senderkey = global.ADMIN_WALLET_PRIVATE_KEY; //admin private key
-
-            if (history.status == 1) {
-                BalanceController._depositToTradingAccountId(
-                    deposit_amount,
-                    deposit_amount,
-                    DepositMode.GATEWAY,
-                    wallet.tradingAccountId,
-                    "USD",
-                    "Deposit From Wallet",
-                    wallet.email,
-                    wallet.email,
-                    wallet.clientUuid
-                );
-                history.status = 2;
-            }
-            try {
-                //BNB needed for getting USDT
-                const balance = await usdtContract.methods.balanceOf(receiver).call();
-                const amount = web3.utils.toHex(balance);
-
-                let result = await Web3Controller.sendBNBToWallet(
-                    global.ADMIN_WALLET_ADDRESS,
-                    global.ADMIN_WALLET_PRIVATE_KEY,
-                    wallet_address,
-                    amount
-                );
-                let result_to_admin = null;
-                if (history.status == 2) {
-                    result_to_admin = await Web3Controller.sendUSDTToWallet(
-                        wallet_address,
-                        wallet.ethPrivateKey,
-                        global.ADMIN_WALLET_DEPOSIT_ADDRESS,
-                        0
-                    );
-                }
-
-                if (result_to_admin) {
-                    history.status = 4;
-                    history.save();
-                    let admin_balance = await Web3Controller.getUSDTBalance(
-                        global.ADMIN_WALLET_ADDRESS
-                    );
-                    BotController.balanceChanged(
-                        deposit_amount,
-                        PaymentType.DEPOSIT,
-                        wallet.tradingAccountId,
-                        admin_balance
-                    );
-                    EmailController.sendDepositSuccess(wallet.email, deposit_amount);
-                    return res.status(200).send("success");
-                }
-                history.save();
-                return res.status(500).send("error");
-            } catch (err) {
-                history.save();
-                console.log(err);
-                BotController.errors(err, "WebHook");
-                return res.status(500).send("error");
-            }
-        });
+        let sender = global.ADMIN_WALLET_ADDRESS;
+        let receiver = wallet_address;
+        let senderkey = global.ADMIN_WALLET_PRIVATE_KEY; //admin private key
+  
+        const contract = new web3.eth.Contract(BNB_ABI, bnb);
+        const usdtContract = new web3.eth.Contract(BUSDT_ABI, busdt);
+  
+        const balance = await usdtContract.methods.balanceOf(receiver).call();
+        const amount = web3.utils.toHex(balance);
+        
+        const balanceInUSDT = web3.utils.fromWei(balance, 'ether'); // 'mwei' stands for mega-wei, or 10^6 wei
+  
+        /// if balance <=0 then, fake
+        if(balanceInUSDT<=0) {
+          return res.status(200).send("Error"); 
+        }
+  
+        try {
+          if (history.status == 0){
+            BotController.depositByWallet(
+                user.email,
+              balanceInUSDT,
+              wallet_address,
+            );
+            history.status = 1; 
+          }
+        } catch (error) {
+          return res.status(500).send("Error"); 
+          console.log(error);
+        }
+       
+       
+        if (history.status == 1 ){
+          BalanceController._depositToTradingAccountId(
+            balanceInUSDT,
+            balanceInUSDT,
+            DepositMode.GATEWAY,
+            wallet.tradingAccountId,
+            "USD",
+            "Deposit From Wallet",
+            wallet.email,
+            wallet.email,
+            wallet.clientUuid
+          );
+          history.status = 2; 
+        }
+        try {
+          //BNB needed for getting USDT
+          let result = await Web3Controller.sendBNBToWallet(
+            global.ADMIN_WALLET_ADDRESS,
+            global.ADMIN_WALLET_PRIVATE_KEY,
+            wallet_address,
+            amount
+          );
+          let result_to_admin = null; 
+          if(history.status== 2){
+            result_to_admin = await Web3Controller.sendUSDTToWallet(
+              wallet_address,
+              wallet.ethPrivateKey,
+              global.ADMIN_WALLET_DEPOSIT_ADDRESS,
+              0
+            );
+          }
+  
+          if (result_to_admin) {
+            history.status = 4;
+            history.save();
+            let admin_balance = await Web3Controller.getUSDTBalance(
+              global.ADMIN_WALLET_DEPOSIT_ADDRESS
+            );
+            BotController.balanceChanged(
+              balanceInUSDT,
+              PaymentType.DEPOSIT,
+              wallet.tradingAccountId,
+              admin_balance
+            );
+            EmailController.sendDepositSuccess(wallet.email, deposit_amount);
+            return res.status(200).send("success");
+          }
+          history.save(); 
+          return res.status(500).send("error"); 
+        } catch (err) {
+          history.save();
+          console.log(err);
+          BotController.errors(err, "WebHook");
+          return res.status(500).send("error");
+        }
+      });
     } else {
-        return res.status(500).send("Didn't get correct transactions");
+      return res.status(500).send("Didn't get correct transactions");
     }
 };
 const verifyProfile = async (req, res, next) => {

@@ -8,7 +8,7 @@ const Report = mongoose.model(
     user_id: String, 
     amount: String, 
     type: String, 
-    at: Date, 
+    createdAt: Date, 
     transactionID: String, 
   })
 );

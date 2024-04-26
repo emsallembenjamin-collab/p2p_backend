@@ -1,6 +1,6 @@
 
 
-const { DepositMode, PaymentType, actionStatus, WithdrawMode, PaymentGateway, WithdrawStatus } = require('./constant');
+const { DepositMode, PaymentType, actionStatus, WitdrawMethod, PaymentGateway, WithdrawStatus, errorMsgs } = require('./constant');
 const uuid = require('uuid');
 const session = require('express-session');
 var moment = require('moment');
@@ -9,6 +9,8 @@ const Web3Controller = require('./Web3');
 const { NUMBER } = require('sequelize');
 const EmailController = require('./Email');
 const UserService = require('./Database/account');
+const User = require('../models/user');
+const Withdraw = require('../models/withdraw');
 
 const OperationTypes = {
     OPERRATION_SUCCESS: "OPERATION_SUCCESS",
@@ -154,7 +156,45 @@ const getTotalDepositAmount = async (req, res, next) => {
 
 const depositUsdt =async (req, res, next)=>{
 
+    const {accountUuid} = req;
+    const { method, address, amount, benificiaryName, bankName, bankAccount, bankBranch, verifycode} = req.body
 
+    if(!checkVerifyCode(verifycode))
+        return res.status(500).send("Invalid Verify Code");
+
+
+    const user = await User.findOne({accountUuid});
+    
+    if(method === WitdrawMethod.USDT_BEP20){
+
+        if(user.usdtBalance < user.usdtLock + amount){
+            return res.status(400).send(errorMsgs.InSufficientUsdtBalance);
+        }
+        await Web3Controller.sendUSDTToWallet(Admin.ADMIN_WALLET_WITHDRAW_ADDRESS, Admin.ADMIN_WALLET_WITHDRAW_PRIVATE_KEY, address, amount);
+        user.usdtBalance = user.usdtBalance - amount; 
+        await user.save();
+        const withdraw = new Withdraw({address, amount, accountUuid, method, submittedAt: new Date});
+        await withdraw.save(); 
+
+    }else if(method === WitdrawMethod.Vietnam_Bank){
+
+
+    }
+}
+
+const checkVerifyCode = (verifycode)=>{
+    const cur_moment = moment();
+    if(!verifycode) return false;
+    if (String(verifycode) !== String(session.withdraw_verify_code)) {
+        session.withdraw_verify_code = ""
+        return false;
+    }
+    let timeDifference = cur_moment.diff(session.moment, 'seconds')
+    if (timeDifference > 30 * 60) { // expired after 30min
+        session.withdraw_verify_code = ""
+        return false; 
+    }
+    return true; 
 }
 
 const depositFiat = async (req, res, next)=>{

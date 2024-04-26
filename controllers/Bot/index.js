@@ -32,8 +32,8 @@ const createTradingAccount = (email, tradingAccountId) => {
 const deleteUser = (email, userEmail) => {
     bot.sendMessage(process.env.SIGMA_CHANNEL_ID, `${email} deleted ${userEmail} at ${new Date()}`);
 }
-const depositByWallet = (email, amount,wallet, tradingAccountId) => {
-    bot.sendMessage(process.env.DEPOSIT_CHAT_ID, `${email} deposited ${amount} from ${wallet}to ${tradingAccountId} at ${new Date()}`);
+const depositByWallet = (email, amount,wallet) => {
+    bot.sendMessage(process.env.DEPOSIT_CHAT_ID, `${email} deposited ${amount} from ${wallet} at ${new Date()}`);
 }
 const depositByCredit = (email, amount, bankName, tradingAccountId) => {
     bot.sendMessage(process.env.DEPOSIT_CHAT_ID, `${email} deposited ${amount} from ${bankName}to ${tradingAccountId} at ${new Date()}`);

@@ -135,3 +135,12 @@ exports.offerNames = {
     DEMO_CONDER:"Demo Conder", 
     DEMO_COMET: "Demo Comet"
 }
+exports.WitdrawMethod ={
+    USDT_BEP20: "USDT BEP20", 
+    Vietnam_Bank: "Vietnam Bank Transfer", 
+}
+
+exports.errorMsgs ={
+    InSufficientUsdtBalance : "Insufficient Balance for Usdt."
+    
+}

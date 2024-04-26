@@ -30,11 +30,7 @@ router.get("/balance-analytics", [authJwt.verifyToken], AnalyticsController.getB
 
 router.post("/deposite/usdt", [authJwt.verifyToken], BalanceController.depositUsdt)
 router.post("/deposite/fiat", [authJwt.verifyToken], BalanceController.depositFiat)
-// router.post("/deposite/bnb", [authJwt.verifyToken], )
-// router.post("/deposite/fiat", [authJwt.verifyToken], )
-// router.post("/withdraw/usdt", [authJwt.verifyToken], )
-// router.post("/withdraw/bnb", [authJwt.verifyToken], )
-// router.post("/withdraw/fiat", [authJwt.verifyToken], )
+
 router.post("/order/buy", [authJwt.verifyToken], OrderController.OrderBuy )
 router.post("/order/sell", [authJwt.verifyToken], OrderController.OrderSell)
 router.post("/order/cancel", [authJwt.verifyToken], OrderController.OrderCancel)
