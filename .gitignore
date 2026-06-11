@@ -1,10 +1,28 @@
-node_modules
-/public/uploads
+# Dependencies
+node_modules/
+
+# Runtime output
+/public/uploads/
 /public/result.csv
-/controllers/user_.js
-/public/qrcode
+/public/qrcode/
+*.log
+
+# Local configuration and credentials
 .env
+.env.*
+!.env.example
 .env.prod
+/controllers/Firebase/serviceAccountKey.json
+/cert/
+/ssl/
+/API key for Pushnotification.txt
+
+# Local editor and operating-system files
+.idea/
+.vscode/*.local.json
+.DS_Store
+Thumbs.db
+
+# Project-specific generated files
+/controllers/user_.js
 /controllers/Commission/setting.json
-package-lock.json
-yarn.lock

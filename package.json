@@ -1,16 +1,25 @@
 {
-  "name": "news_backend",
+  "name": "p2p-backend",
   "version": "1.0.0",
-  "description": "The backend for news website",
+  "description": "REST and WebSocket backend for a peer-to-peer trading platform",
   "main": "index.js",
+  "private": true,
   "scripts": {
-    "start": "nodemon --ignore *.json",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "dev": "nodemon --ignore '*.json' index.js",
+    "test": "node --test",
+    "check": "npm run check:syntax && npm test",
+    "check:syntax": "node scripts/check-syntax.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "keywords": [
-    "node.js",
-    "news",
-    "web3.js"
+    "nodejs",
+    "express",
+    "p2p",
+    "trading",
+    "web3"
   ],
   "author": "smallbaby102",
   "license": "ISC",
@@ -43,7 +52,6 @@
     "node-cron": "^3.0.2",
     "node-telegram-bot-api": "^0.61.0",
     "nodemailer": "^6.8.0",
-    "nodemon": "^2.0.20",
     "puppeteer": "^13.7.0",
     "qrcode": "^1.5.3",
     "request": "^2.88.2",
@@ -55,5 +63,8 @@
     "web3": "^1.7.0",
     "ws": "^8.14.2",
     "xml2js": "^0.4.23"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
   }
 }
