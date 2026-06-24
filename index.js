@@ -4,41 +4,45 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const AdminWallet = require("./models/admin_wallet");
-// token address
 require("dotenv").config();
+const { loadEnvironment } = require('./config/environment');
 const Moralis = require('./controllers/Moralis');
 const BotController = require("./controllers/Bot");
 const WebSocketController = require("./socket_server");
 
-const busdt = "0x55d398326f99059fF775485246999027B3197955"; ///BUSDT Contract
-const bnb = "0x242a1ff6ee06f2131b7924cacb74c7f9e3a5edc9";
-var cron = require('node-cron');
-var manager_api_token = "";
-const { readHTMLFile } = require("./utils/helper.js");
+const environment = loadEnvironment();
 
 WebSocketController.init();
 
-mongoose.connect(`${process.env.DB_URL}/${process.env.DB_NAME}`, [], (err) => {
+const databaseUri = `${environment.databaseUrl}/${environment.databaseName}`;
+mongoose.connect(databaseUri, [], (err) => {
     if (err) {
-        console.log(`DB connection failed at ${process.env.DB_URL}/${process.env.DB_NAME}`);
+        console.error('Database connection failed:', err.message);
     } else {
-        console.log(`DB connected at ${process.env.DB_URL}/${process.env.DB_NAME}`);
+        console.log('Database connection established.');
     }
 });
 
 const auth = require("./api/auth");
 const user = require("./api/user");
-const admin = require("./api/admin");
 const { checkAdmin } = require("./middlewares");
 const SocketController = require("./controllers/Notification");
 
 const app = express();
-const oneDay = 1000 * 60 * 60 * 24;
+if (environment.trustProxy) {
+    app.set('trust proxy', 1);
+}
+
 app.use(session({
     name: 'app.sid',
-    secret: "exxo",
-    saveUninitialized: true,
-    cookie: { maxAge: oneDay },
+    secret: environment.sessionSecret,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        maxAge: environment.sessionMaxAgeMs,
+        sameSite: 'lax',
+        secure: environment.isProduction,
+    },
     resave: false
 }));
 
@@ -87,9 +91,7 @@ const getAdminWallet = async () => {
     }
 }
 
-const PORT = process.env.PORT || 8080;
-
-app.listen(PORT, async () => {
+app.listen(environment.port, async () => {
     Moralis.initMoralis();
     getAdminWallet(); 
     SocketController.initSecketServer();
