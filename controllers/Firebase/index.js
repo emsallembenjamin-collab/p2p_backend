@@ -1,35 +1,23 @@
 const admin = require("firebase-admin");
-const serviceAccount = require("serviceAccountKey.json");
+const serviceAccount = require("./serviceAccountKey.json");
+const { buildPushMessage } = require('../../utils/pushNotification');
 
 const initFirebase = () => {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
-};
-
-const sendPushNotification = (token, message) => {
-
-  const message = {
-    notification: {
-      title: 'Title of the notification',
-      body: 'Body of the notification'
-    },
-    token: req.body.token // This token you'll get from the client side
-  };
-
-  admin
-    .messaging()
-    .send(message)
-    .then((response) => {
-      // Successfully sent message
-    })
-    .catch((error) => {
-      // Handle errors
+  if (admin.apps.length === 0) {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
     });
+  }
+
+  return admin.app();
 };
 
+const sendPushNotification = async (token, notification) => {
+  const message = buildPushMessage(token, notification);
+  return admin.messaging().send(message);
+};
 
-const FirebaseContrller = {
-  initFirebase, 
-  sendPushNotification
-}
+module.exports = {
+  initFirebase,
+  sendPushNotification,
+};
