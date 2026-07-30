@@ -1,130 +1,92 @@
+const jwt = require('jsonwebtoken');
 
-const jwt = require("jsonwebtoken");
-const config = require("../config/auth.js");
-const { AccountRole, AdminRole } = require("../controllers/constant");
-const RoleService = require("../controllers/Database/role.js");
+const config = require('../config/auth');
+const { AccountRole, AdminRole } = require('../controllers/constant');
+const RoleService = require('../controllers/Database/role');
+const { extractBearerToken } = require('../utils/authorization');
+const { createPermissionMiddleware, hasPermission } = require('../utils/permissions');
 
-const checkAdmin = async (req, res, next) => {
-    const admin = getEmailFromToken(req);
+function decodeAdmin(req) {
+  try {
+    const token = extractBearerToken(req.get('authorization'));
+    return jwt.verify(token, config.secret);
+  } catch (error) {
+    return null;
+  }
+}
+
+function attachAdmin(req, admin) {
+  req.email = admin.email;
+  req.adminUuid = admin.adminUuid;
+  req.role = admin.role;
+  req.admin = admin;
+}
+
+function authenticateAdmin({ requireTwoFactor = true } = {}) {
+  return function adminAuthentication(req, res, next) {
+    const admin = decodeAdmin(req);
+
     if (!admin) {
-        return res.status(401).send({ error: "Unauthorized User" });
+      return res.status(401).send({ error: 'Unauthorized user' });
     }
-    if(admin.enable2FA && !admin.verified_2fa ){
-        return res.status(405).send({ error: "Unauthorized User" });
+
+    if (requireTwoFactor && admin.enable2FA && !admin.verified_2fa) {
+      return res.status(403).send({ error: 'Two-factor verification is required' });
     }
-    req.email = admin.email;
-    req.adminUuid = admin.adminUuid;
-    req.role = admin.role;
-    req.admin = admin;
-    next();
-}
-const checkAdminWithout2FA = async (req, res, next) => {
-    const admin = getEmailFromToken(req);
-    if (!admin) {
-        return res.status(401).send({ error: "Unauthorized User" });
-    }
-    req.email = admin.email;
-    req.adminUuid = admin.adminUuid;
-    req.role = admin.role;
-    req.admin = admin;
-    next();
+
+    attachAdmin(req, admin);
+    return next();
+  };
 }
 
-const getEmailFromToken = (req) => {
-    try {
-        let token = req.headers["authorization"];
-        let decode = jwt.verify(token, config.secret);
-        return decode;
-    } catch (e) {
-        console.log(e);
-        return false;
-    }
-}
+const permissionOptions = {
+  getRole: (roleId) => RoleService.getRole(roleId),
+  superAdminRole: AccountRole.SUPER_ADMIN,
+};
 
-const checkUpdateAdmin = (req, res, next) => {
+const checkAdmin = authenticateAdmin();
+const checkAdminWithout2FA = authenticateAdmin({ requireTwoFactor: false });
 
-    const admin = req.admin;
-    if(checkRole(AdminRole.UPDATE_ADMIN , admin)){
-        next(); 
-    }else{
-        res.status(403).send({
-            error: "Forbidden Rquest"
-        })
-    }
-}
+const checkUpdateAdmin = createPermissionMiddleware(
+  AdminRole.UPDATE_ADMIN,
+  permissionOptions,
+);
+const checkUpdateSetting = createPermissionMiddleware(
+  AdminRole.UPDATE_SETTING,
+  permissionOptions,
+);
+const checkUpdateCommissionSetup = createPermissionMiddleware(
+  AdminRole.UPDATE_COMMISSION_SETUP,
+  permissionOptions,
+);
+const checkUpdateWithdrawStatus = createPermissionMiddleware(
+  AdminRole.APPROVE_WITHDRAW,
+  permissionOptions,
+);
+const checkUpdateUser = createPermissionMiddleware(
+  AdminRole.UPDATE_USER,
+  permissionOptions,
+);
+const checkUpdateIBUser = createPermissionMiddleware(
+  AdminRole.UPDATE_IBUSER,
+  permissionOptions,
+);
 
-const checkUpdateSetting = (req, res, next) => {
-    const admin = req.admin;
-    if(checkRole(AdminRole.UPDATE_SETTING , admin)){
-        next(); 
-    }else{
-        res.status(403).send({
-            error: "Forbidden Rquest"
-        })
-    }
-}
-const checkUpdateCommissionSetup = async (req, res, next) => {
-    const admin = req.admin;
-    if(checkRole(AdminRole.UPDATE_COMMISSION_SETUP , admin)){
-        next(); 
-    }else{
-        res.status(403).send({
-            error: "Forbidden Rquest"
-        })
-    }
-}
-const checkUpdateWithdrawStatus = async (req, res, next) => {
-    const admin = req.admin;
-    if(checkRole(AdminRole.APPROVE_WITHDRAW , admin)){
-        next(); 
-    }else{
-        res.status(403).send({
-            error: "Forbidden Rquest"
-        })
-    }
-}
-const checkUpdateUser = async (req, res, next) => {
-    const admin = req.admin;
-    if(checkRole(AdminRole.UPDATE_USER , admin)){
-        next(); 
-    }else{
-        res.status(403).send({
-            error: "Forbidden Rquest"
-        })
-    }
-}
+const checkRole = (permission, admin) => hasPermission(
+  admin,
+  permission,
+  permissionOptions,
+);
 
-const checkUpdateIBUser = async (req, res, next) => {
-    const admin = req.admin;
-    if(checkRole(AdminRole.UPDATE_IBUSER , admin)){
-        next(); 
-    }else{
-        res.status(403).send({
-            error: "Forbidden Rquest"
-        })
-    }
-}
-
-const checkRole = async (permission, admin)=>{
-    if (admin.role === AccountRole.SUPER_ADMIN) {
-        return true; 
-    } else {
-        if(!admin.subRole) return false; 
-        let role = await RoleService.getRole(admin.subRole)
-        if (role.permissions.findIndex(item => item === permission) !== -1) {
-            return true; 
-        } else {
-           return false; 
-        }
-    }
-}
 module.exports = {
-    checkAdmin, 
-    checkAdminWithout2FA, 
-    checkUpdateAdmin, 
-    checkUpdateCommissionSetup, 
-    checkUpdateSetting, 
-    checkUpdateWithdrawStatus, 
-    checkUpdateIBUser, 
-    checkUpdateUser
+  authenticateAdmin,
+  checkAdmin,
+  checkAdminWithout2FA,
+  checkRole,
+  checkUpdateAdmin,
+  checkUpdateCommissionSetup,
+  checkUpdateIBUser,
+  checkUpdateSetting,
+  checkUpdateUser,
+  checkUpdateWithdrawStatus,
 };
