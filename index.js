@@ -9,6 +9,7 @@ const { loadEnvironment } = require('./config/environment');
 const Moralis = require('./controllers/Moralis');
 const BotController = require("./controllers/Bot");
 const WebSocketController = require("./socket_server");
+const { UnsafePathError, resolveDownloadPath } = require('./utils/safePath');
 
 const environment = loadEnvironment();
 
@@ -60,13 +61,31 @@ app.use(cookieParser());
 app.get("/result", (req, res) => {
     res.sendFile(__dirname + "/public/result.csv");
 });
-app.get(`/download/uploads/:filename`, [checkAdmin], (req, res) => {
-    res.download(__dirname + "/public/uploads/" + req.params.filename);
+app.get('/download/uploads/:filename', [checkAdmin], (req, res, next) => {
+    try {
+        const uploadDirectory = `${__dirname}/public/uploads`;
+        const downloadPath = resolveDownloadPath(uploadDirectory, req.params.filename);
+
+        return res.download(downloadPath, req.params.filename, (error) => {
+            if (error && !res.headersSent) next(error);
+        });
+    } catch (error) {
+        return next(error);
+    }
 });
 
 app.use("/api/auth", auth);
 app.use("/api/user", user);
 // app.use("/api/admin", admin);
+
+app.use((error, req, res, next) => {
+    if (error instanceof UnsafePathError) {
+        return res.status(error.statusCode).send({ message: error.message });
+    }
+
+    console.error('Unhandled request error:', error);
+    return res.status(500).send({ message: 'Internal server error' });
+});
 
 const getAdminWallet = async () => {
 
