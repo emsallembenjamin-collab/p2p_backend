@@ -58,3 +58,101 @@ Routes are grouped by responsibility:
 The administrative router exists in `api/admin.js`, but mounting it is currently
 disabled in `index.js`. Review its authorization and operational requirements
 before enabling it.
+
+## Installation
+
+Clone the repository, enter its directory, and install dependencies:
+
+```bash
+git clone <repository-url>
+cd p2p_backend
+npm install
+```
+
+Do not commit `node_modules`; dependencies are restored from `package.json`.
+
+## Environment Setup
+
+Copy the example file and replace every placeholder required by your deployment:
+
+```bash
+cp .env.example .env
+```
+
+On PowerShell, use `Copy-Item .env.example .env` instead. At minimum, local
+startup requires `DB_URL`, `DB_NAME`, `SESSION_SECRET`, `JWT_SECRET`, and
+`TFA_SECRET`. Authentication and 2FA secrets must be long, random, and different.
+
+Generate secret values with Node.js:
+
+```bash
+node -e "console.log(require('node:crypto').randomBytes(48).toString('hex'))"
+```
+
+The example file documents common integration settings, but individual legacy
+controllers may require additional provider-specific variables. Search for
+`process.env` before enabling an integration and add those values only to `.env`
+or your deployment secret store.
+
+## Running the Application
+
+Start the production-style process:
+
+```bash
+npm start
+```
+
+For local development with automatic restarts:
+
+```bash
+npm run dev
+```
+
+The HTTP server uses port `8080` by default. WebSocket ports and TLS behavior are
+configured separately by the existing notification services.
+
+## Tests and Validation
+
+Run all dependency-free unit tests with:
+
+```bash
+npm test
+```
+
+Validate the syntax of every JavaScript file:
+
+```bash
+npm run check:syntax
+```
+
+Run both checks in sequence before committing:
+
+```bash
+npm run check
+```
+
+## Project Structure
+
+```text
+api/                 Express route definitions
+config/              Authentication and environment configuration
+controllers/         Request handlers, integrations, and data-access services
+middlewares/         Authentication, authorization, and request checks
+models/              Mongoose schemas and models
+public/               Email templates and public assets
+Queries/              Analytics query helpers
+scripts/              Repository validation scripts
+socket_server/        WebSocket server implementation
+test/                 Node.js unit tests
+utils/                Reusable validation and service helpers
+index.js              Application entry point
+```
+
+## Security Notes
+
+- Never commit `.env`, private keys, TLS certificates, or service-account files.
+- Rotate any credential that has ever appeared in Git history before deployment.
+- Use separate values for session, JWT, and temporary 2FA token secrets.
+- Keep the admin router disabled until all desired routes have been reviewed.
+- Restrict uploaded files and generated QR codes at the proxy or storage layer.
+- Configure `TRUST_PROXY=true` only behind a trusted reverse proxy.
