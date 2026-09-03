@@ -156,3 +156,96 @@ index.js              Application entry point
 - Keep the admin router disabled until all desired routes have been reviewed.
 - Restrict uploaded files and generated QR codes at the proxy or storage layer.
 - Configure `TRUST_PROXY=true` only behind a trusted reverse proxy.
+
+## Useful Commands
+
+| Command | Purpose |
+| --- | --- |
+| `npm start` | Start the application with Node.js |
+| `npm run dev` | Start with automatic restarts |
+| `npm test` | Run the unit test suite |
+| `npm run check:syntax` | Parse-check all JavaScript files |
+| `npm run check` | Run syntax checks and tests |
+| `git status` | Show the working tree and staged changes |
+| `git diff` | Review unstaged changes |
+| `git diff --staged` | Review changes prepared for commit |
+
+## Basic Development Workflow
+
+1. Update `main` from your trusted remote without rewriting local history.
+2. Create a descriptive branch such as `fix/order-validation`.
+3. Make one focused change and add or update its tests.
+4. Run `npm run check` and inspect `git diff`.
+5. Stage only related files and write a descriptive commit message.
+6. Merge the completed branch after review and retain it while learning.
+
+Example commands:
+
+```bash
+git switch main
+git switch -c fix/order-validation
+git status
+git add api/order.js test/order.test.js
+git commit -m "fix: validate order amounts"
+git switch main
+git merge --no-ff fix/order-validation
+```
+
+## Git Learning Exercise
+
+This repository contains a sample multi-branch commit history created from real
+maintenance issues. The feature branches are intentionally retained. Each branch
+groups related commits and is joined to `main` with a normal merge commit, making
+the topology visible instead of presenting every change as a straight line.
+
+Start with these read-only exploration commands:
+
+```bash
+git log --oneline
+git log --graph --oneline --all --decorate
+git branch
+git branch -a
+git show <commit>
+git diff <commit1> <commit2>
+git checkout <branch>
+git switch <branch>
+git blame <file>
+```
+
+The angle-bracket values are placeholders. Replace `<commit>` with a hash shown
+by `git log`, and replace `<branch>` with a name shown by `git branch`.
+
+To compare the exact range contributed by a feature branch, first locate its
+common ancestor with `main`, then inspect the range:
+
+```bash
+git merge-base <branch> main
+git log --oneline <merge-base>..<branch>
+git diff <merge-base>..<branch>
+```
+
+Useful exercises for understanding the graph:
+
+- Run the graph command and identify each merge commit on `main`.
+- Switch to a retained feature branch and note where its history stops.
+- Use `git show --stat <commit>` before viewing its complete patch.
+- Compare two adjacent development commits with `git diff A..B`.
+- Run `git blame README.md` to see how the documentation evolved.
+- Return to the integrated version with `git switch main`.
+
+Switching branches updates working-tree files. Commit or stash your own changes
+first; otherwise Git may refuse the switch to protect your work. The exploration
+commands above do not contact a remote, and this exercise does not require a push.
+
+## Troubleshooting
+
+- **Startup reports a missing environment variable:** compare `.env` with
+  `.env.example` and provide the named setting.
+- **MongoDB connection fails:** confirm the server is reachable and verify
+  `DB_URL` and `DB_NAME` independently.
+- **Secure cookies are absent locally:** use `NODE_ENV=development`; production
+  cookies require HTTPS.
+- **A WebSocket TLS file is missing:** use the supported local mode or configure
+  deployment certificate paths before starting that service.
+- **PowerShell blocks `npm.ps1`:** invoke `npm.cmd` or adjust the execution policy
+  according to your organization's security guidance.
