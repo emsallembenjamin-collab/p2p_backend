@@ -1,11 +1,10 @@
 const admin = require("firebase-admin");
-const serviceAccount = require("./serviceAccountKey.json");
 const { buildPushMessage } = require('../../utils/pushNotification');
 
 const initFirebase = () => {
   if (admin.apps.length === 0) {
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
+      credential: admin.credential.applicationDefault(),
     });
   }
 

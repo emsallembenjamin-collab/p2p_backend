@@ -151,6 +151,9 @@ index.js              Application entry point
 ## Security Notes
 
 - Never commit `.env`, private keys, TLS certificates, or service-account files.
+- Supply Firebase credentials through `GOOGLE_APPLICATION_CREDENTIALS`.
+- Supply WebSocket certificate paths through `WS_TLS_KEY_PATH` and
+  `WS_TLS_CERT_PATH`; keep the referenced files outside the repository.
 - Rotate any credential that has ever appeared in Git history before deployment.
 - Use separate values for session, JWT, and temporary 2FA token secrets.
 - Keep the admin router disabled until all desired routes have been reviewed.

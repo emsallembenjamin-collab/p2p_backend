@@ -16,6 +16,7 @@ node_modules/
 /cert/
 /ssl/
 /API key for Pushnotification.txt
+/envF
 
 # Local editor and operating-system files
 .idea/
